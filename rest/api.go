@@ -29,7 +29,8 @@ func (m *Server) Add(c *gin.Context) {
 		respondError(c, status.StatusFileOperationError, err)
 		return
 	}
-	os.Remove(tempFile)
+	// 删除文件
+	// os.Remove(tempFile)
 
 	ret := struct {
 		Cid string `json:"cid"`
