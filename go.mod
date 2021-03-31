@@ -9,8 +9,10 @@ require (
 	github.com/gin-contrib/cors v1.3.1
 	github.com/gin-gonic/gin v1.6.3
 	github.com/gofrs/uuid v4.0.0+incompatible
+	github.com/ipfs/go-ipfs-files v0.0.8
 	github.com/ipfs/go-ipfs-http-client v0.0.5
 	github.com/ipfs/go-log/v2 v2.1.2
+	github.com/ipfs/interface-go-ipfs-core v0.2.3
 	github.com/jinzhu/configor v1.2.1
 	github.com/liyue201/golib v0.0.0-20210225015707-e527cc337867
 	github.com/multiformats/go-multiaddr v0.3.1

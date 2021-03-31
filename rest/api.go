@@ -1,6 +1,7 @@
 package rest
 
 import (
+	"context"
 	"github.com/gin-gonic/gin"
 	"ipfc/rest/status"
 	"ipfc/utils/xfile"
@@ -21,7 +22,7 @@ func (m *Server) Add(c *gin.Context) {
 		respondError(c, status.StatusFileOperationError, err)
 		return
 	}
-	cid, err := m.storage.AddFile(tempFile)
+	cid, err := m.storage.AddFile(context.TODO(), tempFile)
 	if err != nil {
 		respondError(c, status.StatusFileOperationError, err)
 		return
@@ -44,7 +45,7 @@ func (m *Server) Get(c *gin.Context) {
 
 	// 如果文件不存在，则先从storage获取
 	if !xfile.PathExists(filePath) {
-		err := m.storage.RetrieveFile(cid, filePath)
+		err := m.storage.RetrieveFile(context.TODO(), cid, filePath)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, nil)
 			return

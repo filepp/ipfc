@@ -5,6 +5,7 @@ import (
 	"github.com/filecoin-project/go-jsonrpc"
 	"github.com/filecoin-project/lotus/api"
 	logging "github.com/ipfs/go-log/v2"
+	"ipfc/storage/types"
 )
 
 var log = logging.Logger("lotus")
@@ -25,10 +26,12 @@ func NewStorage(apiAddr, token string) (*Storage, error) {
 	}, nil
 }
 
-func (s *Storage) AddFile(filePath string) (cid string, err error) {
+func (s *Storage) AddFile(ctx context.Context, filePath string) (cid string, err error) {
 	return
 }
 
-func (s *Storage) RetrieveFile(cid, outputPath string) error {
+func (s *Storage) RetrieveFile(ctx context.Context, cid, outputPath string) error {
 	return nil
 }
+
+var _ types.Storage = &Storage{}

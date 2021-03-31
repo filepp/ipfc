@@ -1,7 +1,9 @@
 package types
 
-type Storage interface {
-	AddFile(filePath string) (cid string, err error)
+import "context"
 
-	RetrieveFile(cid, outputPath string) error
+type Storage interface {
+	AddFile(ctx context.Context, filePath string) (cid string, err error)
+
+	RetrieveFile(ctx context.Context, cid, outputPath string) error
 }
