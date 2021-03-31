@@ -5,30 +5,10 @@ import (
 	"github.com/filecoin-project/go-jsonrpc"
 	"github.com/filecoin-project/lotus/api"
 	"github.com/filecoin-project/lotus/api/apistruct"
-	logging "github.com/ipfs/go-log/v2"
 	ma "github.com/multiformats/go-multiaddr"
 	manet "github.com/multiformats/go-multiaddr/net"
 	"net/http"
 )
-
-
-var log = logging.Logger("lotus")
-
-type Storage struct {
-	node   api.FullNode
-	closer jsonrpc.ClientCloser
-}
-
-func NewStorage(apiAddr, token string) (*Storage, error) {
-	node, closer, err := GetFullNodeAPIUsingCredentials(context.Background(), apiAddr, token)
-	if err != nil {
-		return nil, err
-	}
-	return &Storage{
-		node:   node,
-		closer: closer,
-	}, nil
-}
 
 func GetFullNodeAPIUsingCredentials(ctx context.Context, apiAddr, token string) (api.FullNode, jsonrpc.ClientCloser, error) {
 	parsedAddr, err := ma.NewMultiaddr(apiAddr)
@@ -64,4 +44,3 @@ func NewFullNodeRPC(ctx context.Context, addr string, requestHeader http.Header)
 
 	return &res, closer, err
 }
-

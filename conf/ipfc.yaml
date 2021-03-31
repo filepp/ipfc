@@ -1,6 +1,9 @@
 http:
   listen_address: 0.0.0.0:8725
 
+repo:
+  dir: ./repo
+
 lotus:
   api_addr: /ip4/192.168.3.201/tcp/7838/http
   token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBbGxvdyI6WyJyZWFkIiwid3JpdGUiLCJzaWduIiwiYWRtaW4iXX0.uHNo6YoTY9GEapgq8hNUIqrn5ggGCcdA7ZEGDrVHB8M

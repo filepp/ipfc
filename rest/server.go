@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	_ "github.com/gin-gonic/gin/binding"
 	logging "github.com/ipfs/go-log/v2"
+	"ipfc/storage/repo"
 	"ipfc/storage/types"
 	"net/http"
 	"sync"
@@ -18,13 +19,15 @@ type Server struct {
 	httpServer *http.Server
 	wg         sync.WaitGroup
 	storage    types.Storage
+	repository *repo.Repository
 }
 
-func NewServer(addr string, storage types.Storage) *Server {
+func NewServer(addr string, storage types.Storage, repository *repo.Repository) *Server {
 	engine := gin.Default()
 	server := &Server{
 		httpServer: &http.Server{Addr: addr, Handler: engine},
 		storage:    storage,
+		repository: repository,
 	}
 	server.setCors(engine)
 	server.initRoute(engine)
@@ -48,7 +51,9 @@ func (m *Server) Stop() {
 }
 
 func (m *Server) initRoute(r gin.IRouter) {
-
+	api := r.Group("/v1")
+	api.PUT("/files", m.Add)      // upload a file
+	api.GET("/files/:cid", m.Get) // download a file
 }
 
 func (m *Server) setCors(r gin.IRouter) {

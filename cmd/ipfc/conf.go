@@ -29,10 +29,14 @@ type (
 	HttpServerConf struct {
 		ListenAddress string `yaml:"listen_address"`
 	}
+	RepoConf struct {
+		Dir string `yaml:"dir"`
+	}
 	Config struct {
 		Lotus LotusConf      `yaml:"lotus"`
 		Ipfs  IpfsConf       `yaml:"ipfs"`
 		Http  HttpServerConf `yaml:"http"`
+		Repo  RepoConf       `yaml:"repo"`
 	}
 )
 

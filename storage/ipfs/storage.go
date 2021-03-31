@@ -24,5 +24,12 @@ func NewStorage(addr string) (*Storage, error) {
 	return &Storage{
 		ipfsApi: httpApi,
 	}, nil
+}
 
+func (s *Storage) AddFile(filePath string) (cid string, err error) {
+	return
+}
+
+func (s *Storage) RetrieveFile(cid, outputPath string) error {
+	return nil
 }
