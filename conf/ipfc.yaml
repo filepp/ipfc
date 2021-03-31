@@ -9,7 +9,7 @@ lotus:
   token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBbGxvdyI6WyJyZWFkIiwid3JpdGUiLCJzaWduIiwiYWRtaW4iXX0.uHNo6YoTY9GEapgq8hNUIqrn5ggGCcdA7ZEGDrVHB8M
 
 deal:
-  miners: [ "t05646","t02166","t08024" ]
+  miners: [ "t05646","t02166","t08438" ]
   fund_address: f3rhxvqxcnmvyasd3ziw7gj5bqph4kofccxj66ihxvcn5x3hyf2rxkcvasgr73d3txq3idk6ctbklesl42drvq
   copies: 2
 
