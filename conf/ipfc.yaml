@@ -2,7 +2,7 @@ http:
   listen_address: 0.0.0.0:8316
 
 repo:
-  dir: ./repo
+  dir: /data/ipfc_data
 
 lotus:
   api_addr: /ip4/192.168.3.201/tcp/7838/http
