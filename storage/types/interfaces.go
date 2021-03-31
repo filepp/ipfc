@@ -7,3 +7,7 @@ type Storage interface {
 
 	RetrieveFile(ctx context.Context, cid, outputPath string) error
 }
+
+type MinerSelector interface {
+	GetMiners(ctx context.Context, info *FileInfo) ([]string, error)
+}

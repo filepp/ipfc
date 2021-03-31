@@ -3,6 +3,8 @@ module ipfc
 go 1.15
 
 require (
+	github.com/filecoin-project/go-address v0.0.5
+	github.com/filecoin-project/go-fil-markets v1.1.9
 	github.com/filecoin-project/go-jsonrpc v0.1.4-0.20210217175800-45ea43ac2bec
 	github.com/filecoin-project/lotus v1.5.3
 	github.com/filecoin-project/specs-actors/v3 v3.1.0 // indirect
@@ -17,6 +19,7 @@ require (
 	github.com/liyue201/golib v0.0.0-20210225015707-e527cc337867
 	github.com/multiformats/go-multiaddr v0.3.1
 	github.com/prometheus/common v0.10.0
+	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1
 )
 
 replace github.com/ipfs/go-log/v2 v2.1.2 => github.com/liyue201/go-log/v2 v2.1.2-0.20210312022747-08ac38b3a792

@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"github.com/jinzhu/configor"
+	"ipfc/storage/lotus"
 	"os"
 )
 
@@ -33,10 +34,11 @@ type (
 		Dir string `yaml:"dir"`
 	}
 	Config struct {
-		Lotus LotusConf      `yaml:"lotus"`
-		Ipfs  IpfsConf       `yaml:"ipfs"`
-		Http  HttpServerConf `yaml:"http"`
-		Repo  RepoConf       `yaml:"repo"`
+		Lotus LotusConf        `yaml:"lotus"`
+		Ipfs  IpfsConf         `yaml:"ipfs"`
+		Http  HttpServerConf   `yaml:"http"`
+		Repo  RepoConf         `yaml:"repo"`
+		Deal  lotus.DealConfig `yaml:"deal"`
 	}
 )
 

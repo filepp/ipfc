@@ -21,7 +21,7 @@ func main() {
 		log.Errorf("failed to new ipfs storage: %v", err)
 		return
 	}
-	lotusStorage, err := lotus.NewStorage(appConfig.Lotus.ApiAddr, appConfig.Lotus.Token)
+	lotusStorage, err := lotus.NewStorage(appConfig.Lotus.ApiAddr, appConfig.Lotus.Token, appConfig.Deal)
 	if err != nil {
 		log.Errorf("failed to new lotus storage: %v", err)
 		return
