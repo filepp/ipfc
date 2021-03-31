@@ -1,5 +1,5 @@
 http:
-  listen_address: 0.0.0.0:8725
+  listen_address: 0.0.0.0:8316
 
 repo:
   dir: ./repo

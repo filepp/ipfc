@@ -123,7 +123,7 @@ func (s *Storage) AddFile(ctx context.Context, filePath string) (cid string, err
 		}
 		_, err := s.node.ClientStartDeal(ctx, param)
 		if err != nil {
-			log.Errorf("failed to start deal: %v", err)
+			log.Errorf("failed to start deal: %v, miner=%v", err, miner)
 		}
 	}
 	return

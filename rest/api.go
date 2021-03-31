@@ -22,7 +22,9 @@ func (m *Server) Add(c *gin.Context) {
 		respondError(c, status.StatusFileOperationError, err)
 		return
 	}
-	cid, err := m.storage.AddFile(context.TODO(), tempFile)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
+	defer cancel()
+	cid, err := m.storage.AddFile(ctx, tempFile)
 	if err != nil {
 		respondError(c, status.StatusFileOperationError, err)
 		return
