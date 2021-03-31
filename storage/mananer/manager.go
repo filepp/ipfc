@@ -21,9 +21,15 @@ func NewManager(hotStorage, coldStorage types.Storage) *Manager {
 func (m *Manager) AddFile(ctx context.Context, filePath string) (cid string, err error) {
 	cid, err = m.hotStorage.AddFile(ctx, filePath)
 	if err != nil {
+		log.Infof("failed to add file to hot storage")
 		return "", err
 	}
-	return m.coldStorage.AddFile(ctx, filePath)
+	_, err = m.coldStorage.AddFile(ctx, filePath)
+	if err != nil {
+		log.Infof("failed to add file to old storage")
+		return "", err
+	}
+	return cid, err
 }
 
 func (m *Manager) RetrieveFile(ctx context.Context, cid, outputPath string) error {
