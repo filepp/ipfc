@@ -35,6 +35,7 @@ func (s *RandomMinerSelector) GetMiners(ctx context.Context, fileInfo *types.Fil
 		}
 		selectedMinerMark[index] = struct{}{}
 		selectedMiners = append(selectedMiners, candidates[index])
+		count--
 	}
 	return selectedMiners, nil
 }
