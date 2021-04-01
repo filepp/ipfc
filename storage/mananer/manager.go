@@ -2,6 +2,7 @@ package mananer
 
 import (
 	"context"
+	"github.com/ipfs/go-cid"
 	"github.com/prometheus/common/log"
 	"ipfc/storage/types"
 )
@@ -18,25 +19,29 @@ func NewManager(hotStorage, coldStorage types.Storage) *Manager {
 	}
 }
 
-func (m *Manager) AddFile(ctx context.Context, filePath string) (cid string, err error) {
-	cid, err = m.hotStorage.AddFile(ctx, filePath)
+func (m *Manager) AddFile(ctx context.Context, filePath string) (fileCid cid.Cid, err error) {
+	fileCid, err = m.hotStorage.AddFile(ctx, filePath)
 	if err != nil {
 		log.Infof("failed to add file to hot storage")
-		return "", err
+		return fileCid, err
 	}
 	_, err = m.coldStorage.AddFile(ctx, filePath)
 	if err != nil {
 		log.Infof("failed to add file to old storage")
-		return "", err
+		return fileCid, err
 	}
-	return cid, err
+	return fileCid, err
 }
 
-func (m *Manager) RetrieveFile(ctx context.Context, cid, outputPath string) error {
-	err := m.hotStorage.RetrieveFile(ctx, cid, outputPath)
+func (m *Manager) RetrieveFile(ctx context.Context, fileCid cid.Cid, outputPath string) error {
+	err := m.hotStorage.RetrieveFile(ctx, fileCid, outputPath)
 	if err != nil {
-		log.Warnf("failed to retrieve file from hot storage: %v", err.Error())
-		return m.coldStorage.RetrieveFile(ctx, cid, outputPath)
+		log.Infof("failed to retrieve file from hot storage: %v", err.Error())
+		err := m.coldStorage.RetrieveFile(ctx, fileCid, outputPath)
+		if err != nil {
+			return err
+		}
+		m.hotStorage.AddFile(ctx, outputPath)
 	}
 	return nil
 }

@@ -2,6 +2,7 @@ package ipfs
 
 import (
 	"context"
+	"github.com/ipfs/go-cid"
 	files "github.com/ipfs/go-ipfs-files"
 	"github.com/ipfs/go-ipfs-http-client"
 	logging "github.com/ipfs/go-log/v2"
@@ -33,29 +34,29 @@ func NewStorage(addr string) (*Storage, error) {
 	}, nil
 }
 
-func (s *Storage) AddFile(ctx context.Context, filePath string) (string, error) {
+func (s *Storage) AddFile(ctx context.Context, filePath string) (cid.Cid, error) {
 	file, err := os.Open(filePath)
 	if err != nil {
 		log.Errorf("%v, filePath=%v", err.Error(), filePath)
-		return ",", err
+		return cid.Undef, err
 	}
 	fileNode := files.NewReaderFile(file)
 	resolved, err := s.ipfsApi.Unixfs().Add(ctx, fileNode)
 	if err != nil {
 		log.Errorf("%v", err.Error())
-		return "", err
+		return cid.Undef, err
 	}
 	log.Infof("Add file:%v, cid:%v", filePath, resolved.Cid())
 	err = s.ipfsApi.Pin().Add(ctx, resolved)
 	if err != nil {
 		log.Errorf("%v", err.Error())
-		return "", err
+		return cid.Undef, err
 	}
-	return resolved.Cid().String(), nil
+	return resolved.Cid(), nil
 }
 
-func (s *Storage) RetrieveFile(ctx context.Context, cid, outputPath string) error {
-	cidPath := path.New("/ipfs/" + cid)
+func (s *Storage) RetrieveFile(ctx context.Context, fileCid cid.Cid, outputPath string) error {
+	cidPath := path.New("/ipfs/" + fileCid.String())
 	fileNode, err := s.ipfsApi.Unixfs().Get(ctx, cidPath)
 	if err != nil {
 		log.Errorf("%v", err.Error())
@@ -76,7 +77,7 @@ func (s *Storage) RetrieveFile(ctx context.Context, cid, outputPath string) erro
 	if _, err := io.ReadFull(f, data); err != nil {
 		return err
 	}
-	log.Infof("Get file:%v", cid)
+	log.Infof("Get file:%v", fileCid.String())
 
 	err = ioutil.WriteFile(outputPath, data, 0666)
 	if err != nil {

@@ -5,9 +5,11 @@ import (
 	"github.com/filecoin-project/go-address"
 	"github.com/filecoin-project/go-fil-markets/storagemarket"
 	"github.com/filecoin-project/go-jsonrpc"
+	"github.com/filecoin-project/go-state-types/abi"
 	"github.com/filecoin-project/lotus/api"
 	"github.com/filecoin-project/lotus/build"
 	types2 "github.com/filecoin-project/lotus/chain/types"
+	"github.com/ipfs/go-cid"
 	logging "github.com/ipfs/go-log/v2"
 	"golang.org/x/xerrors"
 	"ipfc/storage/types"
@@ -77,24 +79,29 @@ func (s *Storage) init() error {
 		}()
 	}
 	s.minerAsks = minerAsks
-	s.minerSelector = NewRandomMinerSelector(minerAsks, s.dealConf.Copies)
+	s.minerSelector = NewRandomMinerSelector()
 	return nil
 }
 
-func (s *Storage) AddFile(ctx context.Context, filePath string) (cid string, err error) {
+func (s *Storage) AddFile(ctx context.Context, filePath string) (fileCid cid.Cid, err error) {
 	fileStat, err := os.Stat(filePath)
 	if err != nil {
 		log.Errorf("failed to get file stat: %v, filePath=%v", err, filePath)
-		return "", err
+		return cid.Undef, err
 	}
-	miners, err := s.minerSelector.GetMiners(ctx, &types.FileInfo{Path: filePath, Size: uint64(fileStat.Size())})
+	size := abi.UnpaddedPieceSize(fileStat.Size()).Padded()
+	fileInfo := &types.FileInfo{
+		Path: filePath,
+		Size: uint64(size),
+	}
+	miners, err := s.minerSelector.GetMiners(ctx, fileInfo, s.dealConf.Copies, s.getCandidateMiners)
 	if err != nil {
 		log.Errorf("no available miner found: %v", err)
-		return "", err
+		return  cid.Undef, err
 	}
 	if len(miners) == 0 {
 		log.Errorf("no available miner found")
-		return "", xerrors.New("no available miner found")
+		return  cid.Undef, xerrors.New("no available miner found")
 	}
 	if len(miners) < s.dealConf.Copies {
 		log.Warnf("need %v miners, but %v satisfy", s.dealConf.Copies, len(miners))
@@ -103,9 +110,9 @@ func (s *Storage) AddFile(ctx context.Context, filePath string) (cid string, err
 	res, err := s.node.ClientImport(ctx, ref)
 	if err != nil {
 		log.Errorf("failed to import file: %v", err)
-		return "", err
+		return  cid.Undef, err
 	}
-	cid = res.Root.String()
+	fileCid = res.Root
 	//TODO: 数据过期后的处理
 	for _, miner := range miners {
 		ask := s.minerAsks[miner]
@@ -117,7 +124,7 @@ func (s *Storage) AddFile(ctx context.Context, filePath string) (cid string, err
 			Wallet:            s.FundAddress,
 			Miner:             ask.Miner,
 			EpochPrice:        ask.Price,
-			DealStartEpoch:    0, // 当前高度
+			DealStartEpoch:    0, // current epoch
 			MinBlocksDuration: uint64(build.MinDealDuration),
 			FastRetrieval:     false,
 		}
@@ -129,13 +136,19 @@ func (s *Storage) AddFile(ctx context.Context, filePath string) (cid string, err
 	return
 }
 
-func (s *Storage) RetrieveFile(ctx context.Context, cid, outputPath string) error {
+func (s *Storage) RetrieveFile(ctx context.Context, fileCid cid.Cid, outputPath string) error {
 	return nil
 }
 
-func (s *Storage) addFileToMiner(ctx context.Context, cid string) error {
-
-	return nil
+func (s *Storage) getCandidateMiners(ctx context.Context, fileInfo *types.FileInfo) []string {
+	var miners []string
+	for miner, minerAsk := range s.minerAsks {
+		if fileInfo.Size < uint64(minerAsk.MinPieceSize) || fileInfo.Size > uint64(minerAsk.MaxPieceSize) {
+			continue
+		}
+		miners = append(miners, miner)
+	}
+	return miners
 }
 
 var _ types.Storage = &Storage{}
