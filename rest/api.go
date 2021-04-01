@@ -3,6 +3,7 @@ package rest
 import (
 	"context"
 	"github.com/gin-gonic/gin"
+	"github.com/ipfs/go-cid"
 	"ipfc/rest/status"
 	"ipfc/utils/xfile"
 	"net/http"
@@ -35,22 +36,27 @@ func (m *Server) Add(c *gin.Context) {
 	ret := struct {
 		Cid string `json:"cid"`
 	}{
-		Cid: cid,
+		Cid: cid.String(),
 	}
 	respondSuccess(c, ret)
 }
 
 func (m *Server) Get(c *gin.Context) {
-	cid := c.Param("cid")
+	strCid := c.Param("cid")
 	//对下载的文件重命名
 	c.Writer.Header().Add("Content-Type", "application/octet-stream")
-	filePath := m.repository.GetCacheFilePath(cid)
+	filePath := m.repository.GetCacheFilePath(strCid)
+	fileCid, err := cid.Decode(strCid)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, "invalid cid")
+		return
+	}
 
 	// 如果文件不存在，则先从storage获取
 	if !xfile.PathExists(filePath) {
-		err := m.storage.RetrieveFile(context.TODO(), cid, filePath)
+		err := m.storage.RetrieveFile(context.TODO(), fileCid, filePath)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, nil)
+			c.JSON(http.StatusInternalServerError, err.Error())
 			return
 		}
 	}

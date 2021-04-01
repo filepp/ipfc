@@ -10,7 +10,7 @@ lotus:
 
 deal:
   miners: [ "t05646","t02166","t08438" ]
-  fund_address: f3rhxvqxcnmvyasd3ziw7gj5bqph4kofccxj66ihxvcn5x3hyf2rxkcvasgr73d3txq3idk6ctbklesl42drvq
+  wallet_address: f3rhxvqxcnmvyasd3ziw7gj5bqph4kofccxj66ihxvcn5x3hyf2rxkcvasgr73d3txq3idk6ctbklesl42drvq
   copies: 2
 
 

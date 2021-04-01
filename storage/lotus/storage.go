@@ -2,6 +2,7 @@ package lotus
 
 import (
 	"context"
+	"fmt"
 	"github.com/filecoin-project/go-address"
 	"github.com/filecoin-project/go-fil-markets/storagemarket"
 	"github.com/filecoin-project/go-jsonrpc"
@@ -9,6 +10,7 @@ import (
 	"github.com/filecoin-project/lotus/api"
 	"github.com/filecoin-project/lotus/build"
 	types2 "github.com/filecoin-project/lotus/chain/types"
+	marketevents "github.com/filecoin-project/lotus/markets/loggers"
 	"github.com/ipfs/go-cid"
 	logging "github.com/ipfs/go-log/v2"
 	"golang.org/x/xerrors"
@@ -20,9 +22,9 @@ import (
 var log = logging.Logger("lotus")
 
 type DealConfig struct {
-	Miners      []string `yaml:"miners"`
-	FundAddress string   `yaml:"fund_address"`
-	Copies      int      `yaml:"copies"`
+	Miners        []string `yaml:"miners"`
+	WalletAddress string   `yaml:"wallet_address"`
+	Copies        int      `yaml:"copies"`
 }
 
 type Storage struct {
@@ -31,7 +33,7 @@ type Storage struct {
 	dealConf      DealConfig
 	minerAsks     map[string]*storagemarket.StorageAsk
 	minerSelector types.MinerSelector
-	FundAddress   address.Address
+	walletAddress address.Address
 }
 
 func NewStorage(apiAddr, token string, dealConf DealConfig) (*Storage, error) {
@@ -49,12 +51,12 @@ func NewStorage(apiAddr, token string, dealConf DealConfig) (*Storage, error) {
 }
 
 func (s *Storage) init() error {
-	addr, err := address.NewFromString(s.dealConf.FundAddress)
+	waddr, err := address.NewFromString(s.dealConf.WalletAddress)
 	if err != nil {
 		log.Errorf("tailed to new address: %v", err)
 		return err
 	}
-	s.FundAddress = addr
+	s.walletAddress = waddr
 	minerAsks := make(map[string]*storagemarket.StorageAsk)
 	for _, miner := range s.dealConf.Miners {
 		addr, err := address.NewFromString(miner)
@@ -97,11 +99,11 @@ func (s *Storage) AddFile(ctx context.Context, filePath string) (fileCid cid.Cid
 	miners, err := s.minerSelector.GetMiners(ctx, fileInfo, s.dealConf.Copies, s.getCandidateMiners)
 	if err != nil {
 		log.Errorf("no available miner found: %v", err)
-		return  cid.Undef, err
+		return cid.Undef, err
 	}
 	if len(miners) == 0 {
 		log.Errorf("no available miner found")
-		return  cid.Undef, xerrors.New("no available miner found")
+		return cid.Undef, xerrors.New("no available miner found")
 	}
 	if len(miners) < s.dealConf.Copies {
 		log.Warnf("need %v miners, but %v satisfy", s.dealConf.Copies, len(miners))
@@ -110,7 +112,7 @@ func (s *Storage) AddFile(ctx context.Context, filePath string) (fileCid cid.Cid
 	res, err := s.node.ClientImport(ctx, ref)
 	if err != nil {
 		log.Errorf("failed to import file: %v", err)
-		return  cid.Undef, err
+		return cid.Undef, err
 	}
 	fileCid = res.Root
 	//TODO: 数据过期后的处理
@@ -121,7 +123,7 @@ func (s *Storage) AddFile(ctx context.Context, filePath string) (fileCid cid.Cid
 				TransferType: storagemarket.TTGraphsync,
 				Root:         res.Root,
 			},
-			Wallet:            s.FundAddress,
+			Wallet:            s.walletAddress,
 			Miner:             ask.Miner,
 			EpochPrice:        ask.Price,
 			DealStartEpoch:    0, // current epoch
@@ -137,6 +139,54 @@ func (s *Storage) AddFile(ctx context.Context, filePath string) (fileCid cid.Cid
 }
 
 func (s *Storage) RetrieveFile(ctx context.Context, fileCid cid.Cid, outputPath string) error {
+	cidPiece := cid.Cid{}
+	offers := getRetrievalOffers(ctx, s.node, fileCid, &cidPiece, s.dealConf.Miners)
+
+	var (
+		events <-chan marketevents.RetrievalEvent
+		o      api.QueryOffer
+		err    error
+		ref    = api.FileRef{Path: outputPath}
+	)
+	for _, o = range offers {
+		events, err = s.node.ClientRetrieveWithEvents(ctx, o.Order(s.walletAddress), &ref)
+		if err != nil {
+			log.Infof("fetching/retrieving cid %s from %s: %s", fileCid, o.Miner, err)
+			continue
+		}
+		return s.loopRetrieveFile(ctx, events)
+	}
+	return xerrors.Errorf("failed to retrieve file ")
+}
+
+func (s *Storage) loopRetrieveFile(ctx context.Context, events <-chan marketevents.RetrievalEvent) error {
+	out := make(chan marketevents.RetrievalEvent, 1)
+	go func() {
+		defer func() {
+			close(out)
+		}()
+	Loop:
+		for {
+			select {
+			case <-ctx.Done():
+				log.Infof("in progress retrieval canceled")
+				break Loop
+			case e, ok := <-events:
+				if !ok {
+					break Loop
+				}
+				if e.Err != "" {
+					log.Infof("in progress retrieval errored: %s", e.Err)
+				}
+				out <- e
+			}
+		}
+	}()
+	for e := range out {
+		if e.Err != "" {
+			return fmt.Errorf("in progress retrieval error: %s", e.Err)
+		}
+	}
 	return nil
 }
 
