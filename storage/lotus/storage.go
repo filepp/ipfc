@@ -69,7 +69,8 @@ func (s *Storage) init() error {
 			defer cancel()
 			mi, err := s.node.StateMinerInfo(ctx, addr, types2.EmptyTSK)
 			if err != nil {
-				log.Errorf("failed to get peerID for miner: %w", err)
+				log.Errorf("failed to get peerID for miner: %v, miner:%v", err, miner)
+				return
 			}
 			ask, err := s.node.ClientQueryAsk(ctx, *mi.PeerId, addr)
 			if err != nil {
