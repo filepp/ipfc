@@ -12,6 +12,6 @@ ipfc:
 
 .PHONY: clean
 clean:
-	rm -f scanner
+	rm -f ipfc
 
 

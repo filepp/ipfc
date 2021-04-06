@@ -2,6 +2,8 @@
 
 IPFC（Inter-Planetary File Cache） 星际文件缓存
 
+![](docs/ipfc.png)
+
 ### 安装依赖
 
 ### IPFS
