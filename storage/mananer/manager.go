@@ -3,6 +3,7 @@ package mananer
 import (
 	"context"
 	"github.com/ipfs/go-cid"
+	"github.com/ipfs/go-datastore"
 	"github.com/prometheus/common/log"
 	"ipfc/storage/types"
 )
@@ -10,12 +11,14 @@ import (
 type Manager struct {
 	hotStorage  types.Storage
 	coldStorage types.Storage
+	datastore   datastore.TxnDatastore
 }
 
-func NewManager(hotStorage, coldStorage types.Storage) *Manager {
+func NewManager(hotStorage, coldStorage types.Storage, datastore datastore.TxnDatastore) *Manager {
 	return &Manager{
 		hotStorage:  hotStorage,
 		coldStorage: coldStorage,
+		datastore:   datastore,
 	}
 }
 
@@ -25,6 +28,7 @@ func (m *Manager) AddFile(ctx context.Context, filePath string) (fileCid cid.Cid
 		log.Infof("failed to add file to hot storage")
 		return fileCid, err
 	}
+
 	_, err = m.coldStorage.AddFile(ctx, filePath)
 	if err != nil {
 		log.Infof("failed to add file to old storage")

@@ -1,10 +1,10 @@
-package rest
+package api
 
 import (
 	"context"
 	"github.com/gin-gonic/gin"
 	"github.com/ipfs/go-cid"
-	"ipfc/rest/status"
+	"ipfc/api/status"
 	"ipfc/utils/xfile"
 	"net/http"
 	"os"

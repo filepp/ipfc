@@ -1,9 +1,9 @@
-package rest
+package api
 
 import (
 	"errors"
 	"github.com/gin-gonic/gin"
-	"ipfc/rest/status"
+	"ipfc/api/status"
 	"net/http"
 	"runtime"
 )

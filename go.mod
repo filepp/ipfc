@@ -13,6 +13,8 @@ require (
 	github.com/gin-gonic/gin v1.6.3
 	github.com/gofrs/uuid v4.0.0+incompatible
 	github.com/ipfs/go-cid v0.0.7
+	github.com/ipfs/go-datastore v0.4.5
+	github.com/ipfs/go-ds-badger2 v0.1.1-0.20200708190120-187fc06f714e
 	github.com/ipfs/go-ipfs-files v0.0.8
 	github.com/ipfs/go-ipfs-http-client v0.0.5
 	github.com/ipfs/go-log/v2 v2.1.2
