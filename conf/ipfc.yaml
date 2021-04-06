@@ -5,8 +5,9 @@ repo:
   dir: /data/ipfc_data
 
 lotus:
-  api_addr: /ip4/192.168.3.201/tcp/7838/http
-  token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBbGxvdyI6WyJyZWFkIiwid3JpdGUiLCJzaWduIiwiYWRtaW4iXX0.uHNo6YoTY9GEapgq8hNUIqrn5ggGCcdA7ZEGDrVHB8M
+  api_addr: /ip4/192.168.3.201/tcp/6734/http
+  token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBbGxvdyI6WyJyZWFkIiwid3JpdGUiLCJzaWduIiwiYWRtaW4iXX0.Qz7AfgQnSUxUWOjS00LpyW1A-TFmv7_nn4wyc4N-jdc
+
 
 deal:
   miners: [ "t05646","t02166","t08438" ]

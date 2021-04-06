@@ -86,6 +86,11 @@ func (s *Storage) init() error {
 }
 
 func (s *Storage) AddFile(ctx context.Context, filePath string) (fileCid cid.Cid, err error) {
+	// TODO: 改成异步
+	return s.doAddFile(ctx, filePath)
+}
+
+func (s *Storage) doAddFile(ctx context.Context, filePath string) (fileCid cid.Cid, err error) {
 	fileStat, err := os.Stat(filePath)
 	if err != nil {
 		log.Errorf("failed to get file stat: %v, filePath=%v", err, filePath)
@@ -139,6 +144,11 @@ func (s *Storage) AddFile(ctx context.Context, filePath string) (fileCid cid.Cid
 }
 
 func (s *Storage) RetrieveFile(ctx context.Context, fileCid cid.Cid, outputPath string) error {
+	// TODO： 改成异步
+	return s.doRetrieveFile(ctx, fileCid, outputPath)
+}
+
+func (s *Storage) doRetrieveFile(ctx context.Context, fileCid cid.Cid, outputPath string) error {
 	cidPiece := cid.Cid{}
 	offers := getRetrievalOffers(ctx, s.node, fileCid, &cidPiece, s.dealConf.Miners)
 
@@ -174,9 +184,6 @@ func (s *Storage) loopRetrieveFile(ctx context.Context, events <-chan marketeven
 			case e, ok := <-events:
 				if !ok {
 					break Loop
-				}
-				if e.Err != "" {
-					log.Infof("in progress retrieval errored: %s", e.Err)
 				}
 				out <- e
 			}
