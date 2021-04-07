@@ -1,10 +1,10 @@
 
 ### 安装IPFS
 参考： https://docs.ipfs.io/recent-releases/go-ipfs-0-7/install/#linux    
-ipfs下载地址 https://dist.ipfs.io/go-ipfs/v0.7.0  
+ipfs下载地址 https://dist.ipfs.io/go-ipfs/v0.8.0  
 ```
-wget https://dist.ipfs.io/go-ipfs/v0.7.0/go-ipfs_v0.7.0_linux-amd64.tar.gz
-tar -xvzf go-ipfs_v0.7.0_linux-amd64.tar.gz
+wget https://dist.ipfs.io/go-ipfs/v0.8.0/go-ipfs_v0.8.0_linux-amd64.tar.gz
+tar -xvzf go-ipfs_v0.8.0_linux-amd64.tar.gz
 cd go-ipfs
 ./install.sh
 ipfs --version

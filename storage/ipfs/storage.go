@@ -46,13 +46,18 @@ func (s *Storage) AddFile(ctx context.Context, filePath string) (cid.Cid, error)
 		log.Errorf("%v", err.Error())
 		return cid.Undef, err
 	}
-	log.Infof("Add file:%v, cid:%v", filePath, resolved.Cid())
+	cidv1 := toCidV1(resolved.Cid())
+	log.Infof("Add file:%v, cid:%v, %v", filePath, resolved.Cid(), cidv1)
 	err = s.ipfsApi.Pin().Add(ctx, resolved)
 	if err != nil {
 		log.Errorf("%v", err.Error())
 		return cid.Undef, err
 	}
-	return resolved.Cid(), nil
+	return cidv1, nil
+}
+
+func toCidV1(c cid.Cid) cid.Cid {
+	return cid.NewCidV1(c.Type(), c.Hash())
 }
 
 func (s *Storage) RetrieveFile(ctx context.Context, fileCid cid.Cid, outputPath string) error {
