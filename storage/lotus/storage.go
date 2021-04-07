@@ -120,6 +120,7 @@ func (s *Storage) doAddFile(ctx context.Context, filePath string) (fileCid cid.C
 		log.Errorf("failed to import file: %v", err)
 		return cid.Undef, err
 	}
+	log.Infof("import %v: %v", filePath, res.Root.String())
 	fileCid = res.Root
 	//TODO: 数据过期后的处理
 	for _, miner := range miners {
