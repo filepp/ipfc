@@ -5,15 +5,13 @@ repo:
   dir: /data/ipfc_data
 
 lotus:
-  api_addr: /ip4/192.168.3.201/tcp/6734/http
-  token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBbGxvdyI6WyJyZWFkIiwid3JpdGUiLCJzaWduIiwiYWRtaW4iXX0.Qz7AfgQnSUxUWOjS00LpyW1A-TFmv7_nn4wyc4N-jdc
-
+  api_addr: /ip4/192.168.3.201/tcp/7846/http
+  token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBbGxvdyI6WyJyZWFkIiwid3JpdGUiLCJzaWduIiwiYWRtaW4iXX0.5xj_v75Dgl9Mf0d8Tdz-D6YAI-2ImMq5pE9fuF6Gn4U
 
 deal:
-  miners: [ "t05646","t02166","t08438" ]
-  wallet_address: f3rhxvqxcnmvyasd3ziw7gj5bqph4kofccxj66ihxvcn5x3hyf2rxkcvasgr73d3txq3idk6ctbklesl42drvq
-  copies: 2
-
+  miners: [ "f01002"]
+  wallet_address: f3v4kzlxblcfahsdoailtnq3kumgr2cuok7ucgysfunnmomstcjj4sqj4pox4uvenbzr4b2qrecbrbdyyjfxra
+  replicas: 1
 
 ipfs:
   api_addr: /ip4/192.168.3.201/tcp/5001

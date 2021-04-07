@@ -24,7 +24,7 @@ var log = logging.Logger("lotus")
 type DealConfig struct {
 	Miners        []string `yaml:"miners"`
 	WalletAddress string   `yaml:"wallet_address"`
-	Copies        int      `yaml:"copies"`
+	Replicas      int      `yaml:"replicas"`
 }
 
 type Storage struct {
@@ -102,7 +102,7 @@ func (s *Storage) doAddFile(ctx context.Context, filePath string) (fileCid cid.C
 		Path: filePath,
 		Size: uint64(size),
 	}
-	miners, err := s.minerSelector.GetMiners(ctx, fileInfo, s.dealConf.Copies, s.getCandidateMiners)
+	miners, err := s.minerSelector.GetMiners(ctx, fileInfo, s.dealConf.Replicas, s.getCandidateMiners)
 	if err != nil {
 		log.Errorf("no available miner found: %v", err)
 		return cid.Undef, err
@@ -111,8 +111,8 @@ func (s *Storage) doAddFile(ctx context.Context, filePath string) (fileCid cid.C
 		log.Errorf("no available miner found")
 		return cid.Undef, xerrors.New("no available miner found")
 	}
-	if len(miners) < s.dealConf.Copies {
-		log.Warnf("need %v miners, but %v satisfy", s.dealConf.Copies, len(miners))
+	if len(miners) < s.dealConf.Replicas {
+		log.Warnf("need %v miners, but %v satisfy", s.dealConf.Replicas, len(miners))
 	}
 	ref := api.FileRef{Path: filePath}
 	res, err := s.node.ClientImport(ctx, ref)
