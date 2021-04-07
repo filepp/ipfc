@@ -6,7 +6,6 @@ import (
 	"github.com/filecoin-project/go-address"
 	"github.com/filecoin-project/go-fil-markets/storagemarket"
 	"github.com/filecoin-project/go-jsonrpc"
-	"github.com/filecoin-project/go-state-types/abi"
 	"github.com/filecoin-project/lotus/api"
 	"github.com/filecoin-project/lotus/build"
 	types2 "github.com/filecoin-project/lotus/chain/types"
@@ -15,7 +14,6 @@ import (
 	logging "github.com/ipfs/go-log/v2"
 	"golang.org/x/xerrors"
 	"ipfc/storage/types"
-	"os"
 	"time"
 )
 
@@ -92,15 +90,23 @@ func (s *Storage) AddFile(ctx context.Context, filePath string) (fileCid cid.Cid
 }
 
 func (s *Storage) doAddFile(ctx context.Context, filePath string) (fileCid cid.Cid, err error) {
-	fileStat, err := os.Stat(filePath)
+	ref := api.FileRef{Path: filePath}
+	res, err := s.node.ClientImport(ctx, ref)
 	if err != nil {
-		log.Errorf("failed to get file stat: %v, filePath=%v", err, filePath)
+		log.Errorf("failed to import file: %v", err)
 		return cid.Undef, err
 	}
-	size := abi.UnpaddedPieceSize(fileStat.Size()).Padded()
+
+	dsz, err := s.node.ClientDealPieceCID(ctx, res.Root)
+	if err != nil {
+		log.Errorf("failed to get piece size: %v", err)
+		return cid.Undef, err
+	}
+	log.Infof("import %v, %+v", filePath, dsz)
+
 	fileInfo := &types.FileInfo{
 		Path: filePath,
-		Size: uint64(size),
+		Size: uint64(dsz.PieceSize),
 	}
 	miners, err := s.minerSelector.GetMiners(ctx, fileInfo, s.dealConf.Replicas, s.getCandidateMiners)
 	if err != nil {
@@ -114,13 +120,8 @@ func (s *Storage) doAddFile(ctx context.Context, filePath string) (fileCid cid.C
 	if len(miners) < s.dealConf.Replicas {
 		log.Warnf("need %v miners, but %v satisfy", s.dealConf.Replicas, len(miners))
 	}
-	ref := api.FileRef{Path: filePath}
-	res, err := s.node.ClientImport(ctx, ref)
-	if err != nil {
-		log.Errorf("failed to import file: %v", err)
-		return cid.Undef, err
-	}
-	log.Infof("import %v: %v", filePath, res.Root.String())
+
+	log.Infof("add file %v: %v", filePath, res.Root.String())
 	fileCid = res.Root
 	//TODO: 数据过期后的处理
 	for _, miner := range miners {
@@ -129,6 +130,8 @@ func (s *Storage) doAddFile(ctx context.Context, filePath string) (fileCid cid.C
 			Data: &storagemarket.DataRef{
 				TransferType: storagemarket.TTGraphsync,
 				Root:         res.Root,
+				PieceCid:     &dsz.PieceCID,
+				PieceSize:    dsz.PieceSize.Unpadded(),
 			},
 			Wallet:            s.walletAddress,
 			Miner:             ask.Miner,
