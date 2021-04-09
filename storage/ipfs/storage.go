@@ -6,6 +6,7 @@ import (
 	files "github.com/ipfs/go-ipfs-files"
 	"github.com/ipfs/go-ipfs-http-client"
 	logging "github.com/ipfs/go-log/v2"
+	"github.com/ipfs/interface-go-ipfs-core/options"
 	"github.com/ipfs/interface-go-ipfs-core/path"
 	ma "github.com/multiformats/go-multiaddr"
 	"io"
@@ -41,23 +42,13 @@ func (s *Storage) AddFile(ctx context.Context, filePath string) (cid.Cid, error)
 		return cid.Undef, err
 	}
 	fileNode := files.NewReaderFile(file)
-	resolved, err := s.ipfsApi.Unixfs().Add(ctx, fileNode)
+	resolved, err := s.ipfsApi.Unixfs().Add(ctx, fileNode, options.Unixfs.CidVersion(1), options.Unixfs.Pin(true))
 	if err != nil {
 		log.Errorf("%v", err.Error())
 		return cid.Undef, err
 	}
-	cidv1 := toCidV1(resolved.Cid())
-	log.Infof("Add file:%v, cid:%v, %v", filePath, resolved.Cid(), cidv1)
-	err = s.ipfsApi.Pin().Add(ctx, resolved)
-	if err != nil {
-		log.Errorf("%v", err.Error())
-		return cid.Undef, err
-	}
-	return cidv1, nil
-}
-
-func toCidV1(c cid.Cid) cid.Cid {
-	return cid.NewCidV1(c.Type(), c.Hash())
+	log.Infof("Add file:%v, cid:%v, %v", filePath, resolved.Cid())
+	return resolved.Root(), nil
 }
 
 func (s *Storage) RetrieveFile(ctx context.Context, fileCid cid.Cid, outputPath string) error {
