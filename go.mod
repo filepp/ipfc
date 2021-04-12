@@ -10,16 +10,17 @@ require (
 	github.com/filecoin-project/specs-actors/v3 v3.1.0 // indirect
 	github.com/gin-contrib/cors v1.3.1
 	github.com/gin-gonic/gin v1.6.3
+	github.com/go-sql-driver/mysql v1.5.0
 	github.com/gofrs/uuid v4.0.0+incompatible
 	github.com/ipfs/go-cid v0.0.7
-	github.com/ipfs/go-datastore v0.4.5
-	github.com/ipfs/go-ds-badger2 v0.1.1-0.20200708190120-187fc06f714e
 	github.com/ipfs/go-ipfs v0.8.0
 	github.com/ipfs/go-ipfs-files v0.0.8
-	github.com/ipfs/go-ipfs-http-client v0.0.5
+	github.com/ipfs/go-ipfs-http-client v0.1.0
 	github.com/ipfs/go-log/v2 v2.1.2
 	github.com/ipfs/interface-go-ipfs-core v0.4.0
 	github.com/jinzhu/configor v1.2.1
+	github.com/jinzhu/gorm v1.9.16
+	github.com/libp2p/go-libp2p-core v0.8.5
 	github.com/liyue201/golib v0.0.0-20210225015707-e527cc337867
 	github.com/multiformats/go-multiaddr v0.3.1
 	github.com/prometheus/common v0.18.0

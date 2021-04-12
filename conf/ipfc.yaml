@@ -16,5 +16,10 @@ deal:
 ipfs:
   api_addr: /ip4/192.168.3.201/tcp/5001
 
-
+mysql:
+  host: 192.168.3.201
+  port: 3306
+  user: root
+  password: 123456
+  db: ipfc
 

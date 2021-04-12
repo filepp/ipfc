@@ -33,7 +33,15 @@ type (
 	RepoConf struct {
 		Dir string `yaml:"dir"`
 	}
+	MysqlConf struct {
+		Host     string `yaml:"host"`
+		Port     int    `yaml:"port"`
+		User     string `yaml:"user"`
+		Password string `yaml:"password" json:"-"`
+		Db       string `yaml:"db"`
+	}
 	Config struct {
+		Mysql MysqlConf        `yaml:"mysql"`
 		Lotus LotusConf        `yaml:"lotus"`
 		Ipfs  IpfsConf         `yaml:"ipfs"`
 		Http  HttpServerConf   `yaml:"http"`

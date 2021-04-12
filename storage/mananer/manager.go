@@ -3,8 +3,8 @@ package mananer
 import (
 	"context"
 	"github.com/ipfs/go-cid"
-	"github.com/ipfs/go-datastore"
 	"github.com/prometheus/common/log"
+	"ipfc/dbstore/ds"
 	"ipfc/storage/types"
 	"time"
 )
@@ -12,14 +12,14 @@ import (
 type Manager struct {
 	hotStorage  types.Storage
 	coldStorage types.Storage
-	datastore   datastore.TxnDatastore
+	dbStore     *ds.DbStore
 }
 
-func NewManager(hotStorage, coldStorage types.Storage, datastore datastore.TxnDatastore) *Manager {
+func NewManager(hotStorage, coldStorage types.Storage, dbStore *ds.DbStore) *Manager {
 	return &Manager{
 		hotStorage:  hotStorage,
 		coldStorage: coldStorage,
-		datastore:   datastore,
+		dbStore:     dbStore,
 	}
 }
 

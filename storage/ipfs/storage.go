@@ -11,6 +11,7 @@ import (
 	"github.com/ipfs/interface-go-ipfs-core/path"
 	"github.com/libp2p/go-libp2p-core/peer"
 	ma "github.com/multiformats/go-multiaddr"
+	"ipfc/dbstore/ds"
 	"ipfc/storage/types"
 	"os"
 )
@@ -19,9 +20,10 @@ var log = logging.Logger("ipfs")
 
 type Storage struct {
 	ipfsApi *httpapi.HttpApi
+	db      *ds.DbStore
 }
 
-func NewStorage(addr string) (*Storage, error) {
+func NewStorage(addr string, db *ds.DbStore) (*Storage, error) {
 	maddr, err := ma.NewMultiaddr(addr)
 	if err != nil {
 		return nil, err
@@ -32,6 +34,7 @@ func NewStorage(addr string) (*Storage, error) {
 	}
 	return &Storage{
 		ipfsApi: httpApi,
+		db:      db,
 	}, nil
 }
 
