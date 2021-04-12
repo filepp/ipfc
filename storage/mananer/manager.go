@@ -6,6 +6,7 @@ import (
 	"github.com/ipfs/go-datastore"
 	"github.com/prometheus/common/log"
 	"ipfc/storage/types"
+	"time"
 )
 
 type Manager struct {
@@ -38,7 +39,11 @@ func (m *Manager) AddFile(ctx context.Context, filePath string) (fileCid cid.Cid
 }
 
 func (m *Manager) RetrieveFile(ctx context.Context, fileCid cid.Cid, outputPath string) error {
-	err := m.hotStorage.RetrieveFile(ctx, fileCid, outputPath)
+	ctx2 , close := context.WithTimeout(ctx, time.Second * 10)
+	defer close()
+
+
+	err := m.hotStorage.RetrieveFile(ctx2, fileCid, outputPath)
 	if err != nil {
 		log.Infof("failed to retrieve file from hot storage: %v", err.Error())
 		err := m.coldStorage.RetrieveFile(ctx, fileCid, outputPath)

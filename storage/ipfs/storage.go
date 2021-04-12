@@ -9,8 +9,6 @@ import (
 	"github.com/ipfs/interface-go-ipfs-core/options"
 	"github.com/ipfs/interface-go-ipfs-core/path"
 	ma "github.com/multiformats/go-multiaddr"
-	"io"
-	"io/ioutil"
 	"ipfc/storage/types"
 	"os"
 )
@@ -60,24 +58,10 @@ func (s *Storage) RetrieveFile(ctx context.Context, fileCid cid.Cid, outputPath 
 	}
 	defer fileNode.Close()
 
-	dataSize, err := fileNode.Size()
+	err = files.WriteTo(fileNode, outputPath)
 	if err != nil {
 		log.Errorf("%v", err.Error())
 		return err
-	}
-	f, _ := fileNode.(interface {
-		files.File
-	})
-
-	data := make([]byte, dataSize)
-	if _, err := io.ReadFull(f, data); err != nil {
-		return err
-	}
-	log.Infof("Get file:%v", fileCid.String())
-
-	err = ioutil.WriteFile(outputPath, data, 0666)
-	if err != nil {
-		log.Warnf("%v", err.Error())
 	}
 	return nil
 }
