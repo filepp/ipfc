@@ -31,5 +31,6 @@ func (h *V1Handler) Handle(ctx context.Context, receivedFrom peer.ID, msg *proto
 
 func (h *V1Handler) HandleFetchFileResp(ctx context.Context, receivedFrom peer.ID, msg *proto.Message) error {
 	//todo:
+	log.Infof("HandleFetchFileResp: %+v", msg)
 	return nil
 }

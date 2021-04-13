@@ -5,6 +5,7 @@ import (
 	"github.com/liyue201/golib/xreflect"
 	"github.com/liyue201/golib/xsignal"
 	"ipfc/api"
+	"ipfc/config"
 	"ipfc/dbstore/ds"
 	"ipfc/storage/ipfs"
 	"ipfc/storage/lotus"
@@ -16,27 +17,28 @@ import (
 var log = logging.Logger("main")
 
 func main() {
-	log.Infof("conf: %v", appConfig)
+	conf := config.AppConfig
+	log.Infof("conf: %v", conf)
 
-	repository := repo.NewRepository(appConfig.Repo.Dir)
+	repository := repo.NewRepository(config.AppConfig.Repo.Dir)
 	dbConf := xgorm.DefaultConfig()
-	xreflect.StructCopy(&appConfig.Mysql, dbConf)
+	xreflect.StructCopy(&config.AppConfig.Mysql, dbConf)
 	db := dbConf.Build()
 	defer db.Close()
 	dbStore := ds.NewDbStore(db)
 
-	ipfsStorage, err := ipfs.NewStorage(appConfig.Ipfs.PeerId, appConfig.Ipfs.ApiAddr, appConfig.Ipfs.Replicas, dbStore)
+	ipfsStorage, err := ipfs.NewStorage(config.AppConfig.Ipfs.PeerId, conf.Ipfs.ApiAddr, conf.Ipfs.Replicas, dbStore)
 	if err != nil {
 		log.Errorf("failed to new ipfs storage: %v", err)
 		return
 	}
-	lotusStorage, err := lotus.NewStorage(appConfig.Lotus.ApiAddr, appConfig.Lotus.Token, appConfig.Deal)
+	lotusStorage, err := lotus.NewStorage(conf.Lotus.ApiAddr, conf.Lotus.Token, conf.Deal)
 	if err != nil {
 		log.Errorf("failed to new lotus storage: %v", err)
 		return
 	}
 	storage := mananer.NewManager(ipfsStorage, lotusStorage, dbStore)
-	server := api.NewServer(appConfig.Http.ListenAddress, storage, repository)
+	server := api.NewServer(conf.Http.ListenAddress, storage, repository)
 	server.Run()
 	defer server.Stop()
 	xsignal.Wait()

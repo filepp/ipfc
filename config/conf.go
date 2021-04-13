@@ -1,4 +1,4 @@
-package main
+package config
 
 import (
 	"encoding/json"
@@ -9,7 +9,7 @@ import (
 
 const EnvConfigPath = "ENV_IPFC_CONFIG_PATH"
 
-var configFilePath = "conf/ipfc.yaml"
+var configFilePath = "resource/ipfc.yaml"
 
 func init() {
 	path := os.Getenv(EnvConfigPath)
@@ -52,7 +52,7 @@ type (
 	}
 )
 
-var appConfig *Config
+var AppConfig Config
 
 func loadConf() {
 	cfg := &Config{}
@@ -61,7 +61,7 @@ func loadConf() {
 		panic(err)
 		return
 	}
-	appConfig = cfg
+	AppConfig = *cfg
 }
 
 func (c *Config) String() string {

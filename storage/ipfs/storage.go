@@ -105,7 +105,7 @@ func (s *Storage) publishFetchMessage(ctx context.Context, id peer.ID, fileCid c
 	msg := proto.Message{
 		Type:  proto.MsgFetchFile,
 		Nonce: s.genNonce(),
-		Data: proto.FetchFile{
+		Data: proto.FetchFileReq{
 			Cid: fileCid,
 		},
 	}
@@ -114,7 +114,6 @@ func (s *Storage) publishFetchMessage(ctx context.Context, id peer.ID, fileCid c
 	if err != nil {
 		return err
 	}
-	// TODO： 处理应答消息
 	return err
 }
 
