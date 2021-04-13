@@ -21,7 +21,8 @@ func NewDbStore(db *gorm.DB) *DbStore {
 }
 
 func (s *DbStore) init() {
-	s.db.Set("gorm:table_options", "ENGINE=InnoDB").AutoMigrate(&model.Miner{})
+	s.db.Set("gorm:table_options", "ENGINE=InnoDB").
+		AutoMigrate(&model.Miner{}, &model.File{}, &model.MinerFile{})
 }
 
 func (s *DbStore) CreateMiner(miner *model.Miner) error {

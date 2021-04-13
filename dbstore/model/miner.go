@@ -1,7 +1,7 @@
 package model
 
 type Miner struct {
-	Id           string
+	Id           string `gorm:"column:id; PRIMARY_KEY"`
 	Role         int
 	State        int
 	CreatedAt    uint64

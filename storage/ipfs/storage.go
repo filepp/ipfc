@@ -2,6 +2,7 @@ package ipfs
 
 import (
 	"context"
+	"github.com/gofrs/uuid"
 	"github.com/ipfs/go-cid"
 	files "github.com/ipfs/go-ipfs-files"
 	"github.com/ipfs/go-ipfs-http-client"
@@ -14,27 +15,37 @@ import (
 	"ipfc/dbstore/ds"
 	"ipfc/storage/types"
 	"os"
+	"strings"
+	"sync"
 )
 
 var log = logging.Logger("ipfs")
 
 type Storage struct {
-	ipfsApi *httpapi.HttpApi
-	db      *ds.DbStore
+	sync.RWMutex
+	ipfsApi    *httpapi.HttpApi
+	db         *ds.DbStore
+	subscriber *Subscriber
+	replicas   int
 }
 
-func NewStorage(addr string, db *ds.DbStore) (*Storage, error) {
+func NewStorage(peerId, addr string, replicas int, db *ds.DbStore) (*Storage, error) {
 	maddr, err := ma.NewMultiaddr(addr)
 	if err != nil {
 		return nil, err
 	}
-	httpApi, err := httpapi.NewApi(maddr)
+	ipfsApi, err := httpapi.NewApi(maddr)
 	if err != nil {
 		return nil, err
 	}
+	subscriber := NewSubscriber(peerId, ipfsApi, NewV1Handler(ipfsApi))
+	subscriber.Subscribe()
+
 	return &Storage{
-		ipfsApi: httpApi,
-		db:      db,
+		ipfsApi:    ipfsApi,
+		db:         db,
+		subscriber: subscriber,
+		replicas:   replicas,
 	}, nil
 }
 
@@ -81,9 +92,8 @@ func (s *Storage) syncToOtherPeers(ctx context.Context, fileCid cid.Cid) error {
 		return err
 	}
 
-	replicas := 3
 	selector := NewPeerSelector()
-	peers, _ = selector.GetPeers(ctx, peers, replicas)
+	peers, _ = selector.GetPeers(ctx, peers, s.replicas)
 	for _, peer := range peers {
 		s.publishFetchMessage(ctx, peer.ID(), fileCid)
 	}
@@ -93,7 +103,8 @@ func (s *Storage) syncToOtherPeers(ctx context.Context, fileCid cid.Cid) error {
 func (s *Storage) publishFetchMessage(ctx context.Context, id peer.ID, fileCid cid.Cid) error {
 	topic := proto.V1Topic(id.String())
 	msg := proto.Message{
-		Type: proto.MsgFetchFile,
+		Type:  proto.MsgFetchFile,
+		Nonce: s.genNonce(),
 		Data: proto.FetchFile{
 			Cid: fileCid,
 		},
@@ -105,6 +116,11 @@ func (s *Storage) publishFetchMessage(ctx context.Context, id peer.ID, fileCid c
 	}
 	// TODO： 处理应答消息
 	return err
+}
+
+func (s *Storage) genNonce() string {
+	nonce, _ := uuid.NewV4()
+	return strings.ReplaceAll(nonce.String(), "-", "")
 }
 
 var _ types.Storage = &Storage{}

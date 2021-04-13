@@ -25,7 +25,9 @@ type (
 		Token   string `yaml:"token"`
 	}
 	IpfsConf struct {
-		ApiAddr string `yaml:"api_addr"`
+		PeerId   string `yaml:"peer_id"`
+		ApiAddr  string `yaml:"api_addr"`
+		Replicas int    `yaml:"replicas"`
 	}
 	HttpServerConf struct {
 		ListenAddress string `yaml:"listen_address"`

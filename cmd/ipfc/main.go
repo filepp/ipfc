@@ -25,7 +25,7 @@ func main() {
 	defer db.Close()
 	dbStore := ds.NewDbStore(db)
 
-	ipfsStorage, err := ipfs.NewStorage(appConfig.Ipfs.ApiAddr, dbStore)
+	ipfsStorage, err := ipfs.NewStorage(appConfig.Ipfs.PeerId, appConfig.Ipfs.ApiAddr, appConfig.Ipfs.Replicas, dbStore)
 	if err != nil {
 		log.Errorf("failed to new ipfs storage: %v", err)
 		return

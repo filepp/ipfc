@@ -9,12 +9,14 @@ lotus:
   token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBbGxvdyI6WyJyZWFkIiwid3JpdGUiLCJzaWduIiwiYWRtaW4iXX0.5xj_v75Dgl9Mf0d8Tdz-D6YAI-2ImMq5pE9fuF6Gn4U
 
 deal:
-  miners: [ "f01002"]
+  miners: [ "f01002" ]
   wallet_address: f3v4kzlxblcfahsdoailtnq3kumgr2cuok7ucgysfunnmomstcjj4sqj4pox4uvenbzr4b2qrecbrbdyyjfxra
   replicas: 1
 
 ipfs:
+  Id: 12D3KooWP7We1ubNk7U7iQNUihZeDgtcVy8fRQPhVBQs6pjHawm4
   api_addr: /ip4/192.168.3.201/tcp/5001
+  replicas: 3
 
 mysql:
   host: 192.168.3.201
