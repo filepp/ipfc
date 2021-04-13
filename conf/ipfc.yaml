@@ -14,7 +14,7 @@ deal:
   replicas: 1
 
 ipfs:
-  Id: 12D3KooWP7We1ubNk7U7iQNUihZeDgtcVy8fRQPhVBQs6pjHawm4
+  peer_id: 12D3KooWP7We1ubNk7U7iQNUihZeDgtcVy8fRQPhVBQs6pjHawm4
   api_addr: /ip4/192.168.3.201/tcp/5001
   replicas: 3
 
