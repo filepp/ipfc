@@ -12,7 +12,7 @@ ipfc:
 
 inspector:
 	rm -f inspector
-	go build $(GOFLAGS) -o ipfc ./cmd/inspector
+	go build $(GOFLAGS) -o inspector ./cmd/inspector
 
 
 .PHONY: clean

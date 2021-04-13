@@ -13,7 +13,7 @@ import (
 	"time"
 )
 
-var log = logging.Logger("rest")
+var log = logging.Logger("api")
 
 type Server struct {
 	httpServer *http.Server

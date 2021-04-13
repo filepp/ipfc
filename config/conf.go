@@ -64,7 +64,7 @@ func loadConf() {
 	AppConfig = *cfg
 }
 
-func (c *Config) String() string {
+func (c Config) String() string {
 	data, _ := json.Marshal(c)
 	return string(data)
 }

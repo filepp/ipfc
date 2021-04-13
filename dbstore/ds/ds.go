@@ -42,12 +42,12 @@ func (s *DbStore) GetMiner(id string) (miner model.Miner, err error) {
 }
 
 func (s *DbStore) GetMiners(role, state, limit, offset int) (list []*model.Miner, err error) {
-	sql := s.db
+	sql := s.db.Model(&model.Miner{})
 	if role != -1 {
-		sql = s.db.Where("role", role)
+		sql = sql.Where("role=?", role)
 	}
 	if state != -1 {
-		sql = sql.Where("state", state)
+		sql = sql.Where("state=?", state)
 	}
 	if limit != 0 {
 		sql = sql.Limit(limit).Offset(offset)
@@ -59,15 +59,44 @@ func (s *DbStore) GetMiners(role, state, limit, offset int) (list []*model.Miner
 	return list, ret.Error
 }
 
-func (s *DbStore) GetAllMiners(role, state int) (list []*model.Miner, err error) {
-	limit := 100
-	var miners []*model.Miner
+func (s *DbStore) GetAllMiners(role, state int) (miners []*model.Miner, err error) {
+	limit := 1000
 	for i := 0; ; i++ {
 		list, _ := s.GetMiners(role, state, limit, limit*i)
-		if len(list) <= 0 {
+		if len(list) > 0 {
+			miners = append(miners, list...)
+		}
+		if len(list) < limit {
 			break
 		}
-		miners = append(miners, list...)
 	}
 	return miners, nil
+}
+
+func (s *DbStore) FileExist(cid string) bool {
+	file := model.File{}
+	ret := s.db.Model(&model.File{}).Where("cid=?", cid).First(&file)
+	if ret.Error == nil {
+		return true
+	}
+	return false
+}
+
+func (s *DbStore) CreateFile(file *model.File) (err error) {
+	ret := s.db.Create(file)
+	if ret.Error != nil {
+		log.Errorf("failed to create file: %v", ret.Error)
+	}
+	return ret.Error
+}
+
+func (s *DbStore) CreateMinerFiles(files []model.MinerFile) (err error) {
+	for _, v := range files {
+		ret := s.db.Model(&model.MinerFile{}).Create(&v)
+		if ret.Error != nil {
+			log.Errorf("failed to create miner file: %v", ret.Error)
+			return ret.Error
+		}
+	}
+	return nil
 }
