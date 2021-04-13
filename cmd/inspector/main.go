@@ -22,7 +22,11 @@ func main() {
 	defer db.Close()
 
 	dbStore := ds.NewDbStore(db)
-	inspector := inspection.NewInspector(conf.Ipfs.PeerId, conf.Ipfs.ApiAddr, dbStore)
+	inspector, err := inspection.NewInspector(conf.Ipfs.PeerId, conf.Ipfs.ApiAddr, dbStore)
+	if err != nil {
+		log.Errorf("failed to new ipfs inspector: %v", err)
+		return
+	}
 	inspector.Run()
 	defer inspector.Stop()
 

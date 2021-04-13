@@ -14,7 +14,6 @@ func NewPeerSelector() *PeerSelector {
 }
 
 func (s *PeerSelector) GetPeers(ctx context.Context, peers []iface.ConnectionInfo, count int) ([]iface.ConnectionInfo, error) {
-
 	if len(peers) <= count {
 		return peers, nil
 	}

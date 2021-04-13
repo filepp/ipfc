@@ -1,12 +1,16 @@
-package ipfs
+package subpub
 
 import (
 	"context"
 	httpapi "github.com/ipfs/go-ipfs-http-client"
 	"github.com/ipfs/go-ipfs/miner/proto"
+	logging "github.com/ipfs/go-log/v2"
 	"runtime/debug"
 	"time"
 )
+
+
+var log = logging.Logger("subpub")
 
 type Subscriber struct {
 	peerId  string

@@ -14,6 +14,7 @@ import (
 	ma "github.com/multiformats/go-multiaddr"
 	"ipfc/dbstore/ds"
 	"ipfc/storage/types"
+	"ipfc/subpub"
 	"os"
 	"strings"
 	"sync"
@@ -25,7 +26,7 @@ type Storage struct {
 	sync.RWMutex
 	ipfsApi    *httpapi.HttpApi
 	db         *ds.DbStore
-	subscriber *Subscriber
+	subscriber *subpub.Subscriber
 	replicas   int
 }
 
@@ -38,7 +39,7 @@ func NewStorage(peerId, addr string, replicas int, db *ds.DbStore) (*Storage, er
 	if err != nil {
 		return nil, err
 	}
-	subscriber := NewSubscriber(peerId, ipfsApi, NewV1Handler(ipfsApi))
+	subscriber := subpub.NewSubscriber(peerId, ipfsApi, NewV1Handler(ipfsApi))
 	subscriber.Subscribe()
 
 	return &Storage{
@@ -92,6 +93,7 @@ func (s *Storage) syncToOtherPeers(ctx context.Context, fileCid cid.Cid) error {
 		return err
 	}
 
+	//todo: 根据节点的容量等判断
 	selector := NewPeerSelector()
 	peers, _ = selector.GetPeers(ctx, peers, s.replicas)
 	for _, peer := range peers {

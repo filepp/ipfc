@@ -1,4 +1,4 @@
-package ipfs
+package subpub
 
 import (
 	"context"
@@ -11,4 +11,3 @@ type HandleFunc func(ctx context.Context, receivedFrom peer.ID, msg *proto.Messa
 type MessageHandler interface {
 	Handle(ctx context.Context, receivedFrom peer.ID, msg *proto.Message) error
 }
-

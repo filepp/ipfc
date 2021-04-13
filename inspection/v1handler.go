@@ -1,10 +1,11 @@
-package ipfs
+package inspection
 
 import (
 	"context"
 	"github.com/ipfs/go-ipfs/miner/proto"
 	"github.com/ipfs/interface-go-ipfs-core"
 	"github.com/libp2p/go-libp2p-core/peer"
+	"github.com/prometheus/common/log"
 	"ipfc/subpub"
 )
 
@@ -18,7 +19,7 @@ func NewV1Handler(api iface.CoreAPI) *V1Handler {
 		api:        api,
 		handleFunc: make(map[string]subpub.HandleFunc),
 	}
-	h.handleFunc[proto.MsgFetchFileResponse] = h.HandleFetchFileResp
+	h.handleFunc[proto.MsgWindowPostResponse] = h.HandleWindowPostResp
 	return h
 }
 
@@ -30,8 +31,8 @@ func (h *V1Handler) Handle(ctx context.Context, receivedFrom peer.ID, msg *proto
 	return nil
 }
 
-func (h *V1Handler) HandleFetchFileResp(ctx context.Context, receivedFrom peer.ID, msg *proto.Message) error {
+func (h *V1Handler) HandleWindowPostResp(ctx context.Context, receivedFrom peer.ID, msg *proto.Message) error {
 	//todo:
-	log.Infof("HandleFetchFileResp: %+v", msg)
+	log.Infof("HandleWindowPostResp: %+v", msg)
 	return nil
 }
