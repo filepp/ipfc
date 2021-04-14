@@ -60,7 +60,7 @@ func (s *Storage) AddFile(ctx context.Context, filePath string) (cid.Cid, error)
 		return cid.Undef, err
 	}
 	fileNode := files.NewReaderFile(file)
-	resolved, err := s.ipfsApi.Unixfs().Add(ctx, fileNode, options.Unixfs.CidVersion(1), options.Unixfs.Pin(true))
+	resolved, err := s.ipfsApi.Unixfs().Add(ctx, fileNode, options.Unixfs.Pin(true))
 	if err != nil {
 		log.Errorf("%v", err.Error())
 		return cid.Undef, err
@@ -132,7 +132,7 @@ func (s *Storage) syncToOtherPeers(ctx context.Context, fileCid cid.Cid) error {
 }
 
 func (s *Storage) publishFetchMessage(ctx context.Context, id peer.ID, fileCid cid.Cid) error {
-	topic := proto.V1Topic(id.String())
+	topic := proto.V1InternalTopic(id.String())
 	msg := proto.Message{
 		Type:  proto.MsgFetchFile,
 		Nonce: s.genNonce(),
@@ -154,9 +154,10 @@ func (s *Storage) genNonce() string {
 	return strings.ReplaceAll(nonce.String(), "-", "")
 }
 
+
 func (s *Storage) allMiners() map[string]*model.Miner {
 	//todo: 缓存优化
-	list, _ := s.db.GetAllMiners(-1, -1)
+	list, _ := s.db.GetAllMiners(model.RoleEdgeNode, -1)
 	miners := make(map[string]*model.Miner)
 	for _, v := range list {
 		miners[v.Id] = v

@@ -27,12 +27,12 @@ func NewSubscriber(peerId string, ipfsApi *httpapi.HttpApi, handler MessageHandl
 }
 
 func (s *Subscriber) Subscribe() error {
-	sub, err := s.ipfsApi.PubSub().Subscribe(context.TODO(), proto.V1Topic(s.peerId))
+	sub, err := s.ipfsApi.PubSub().Subscribe(context.TODO(), proto.V1ExternalTopic(s.peerId))
 	if err != nil {
 		log.Errorf("failed to subscribe: %v", err)
 		return err
 	}
-	log.Infof("subscribe: %v", proto.V1Topic(s.peerId))
+	log.Infof("subscribe: %v", proto.V1ExternalTopic(s.peerId))
 
 	go func() {
 		for {
