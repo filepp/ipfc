@@ -42,8 +42,9 @@ func NewStorage(peerId, addr string, replicas int, db *ds.DbStore) (*Storage, er
 	if err != nil {
 		return nil, err
 	}
-	subscriber := subpub.NewSubscriber(peerId, ipfsApi, NewV1Handler(ipfsApi))
-	subscriber.Subscribe()
+	subscriber := subpub.NewSubscriber(ipfsApi)
+	handler := NewV1Handler(ipfsApi)
+	subscriber.Subscribe(proto.V1ExternalTopic(peerId), handler.Handle)
 
 	return &Storage{
 		ipfsApi:    ipfsApi,
@@ -153,7 +154,6 @@ func (s *Storage) genNonce() string {
 	nonce, _ := uuid.NewV4()
 	return strings.ReplaceAll(nonce.String(), "-", "")
 }
-
 
 func (s *Storage) allMiners() map[string]*model.Miner {
 	//todo: 缓存优化

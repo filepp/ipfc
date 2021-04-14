@@ -9,30 +9,25 @@ import (
 	"time"
 )
 
-
 var log = logging.Logger("subpub")
 
 type Subscriber struct {
-	peerId  string
 	ipfsApi *httpapi.HttpApi
-	handler MessageHandler
 }
 
-func NewSubscriber(peerId string, ipfsApi *httpapi.HttpApi, handler MessageHandler) *Subscriber {
+func NewSubscriber(ipfsApi *httpapi.HttpApi) *Subscriber {
 	return &Subscriber{
-		peerId:  peerId,
 		ipfsApi: ipfsApi,
-		handler: handler,
 	}
 }
 
-func (s *Subscriber) Subscribe() error {
-	sub, err := s.ipfsApi.PubSub().Subscribe(context.TODO(), proto.V1ExternalTopic(s.peerId))
+func (s *Subscriber) Subscribe(topic string, handler HandleFunc) error {
+	sub, err := s.ipfsApi.PubSub().Subscribe(context.TODO(), topic)
 	if err != nil {
 		log.Errorf("failed to subscribe: %v", err)
 		return err
 	}
-	log.Infof("subscribe: %v", proto.V1ExternalTopic(s.peerId))
+	log.Infof("subscribe: %v", topic)
 
 	go func() {
 		for {
@@ -54,7 +49,7 @@ func (s *Subscriber) Subscribe() error {
 					log.Errorf("failed to decode message: %v", err)
 					return
 				}
-				err = s.handler.Handle(context.TODO(), pmsg.From(), &msg)
+				err = handler(context.TODO(), pmsg.From(), &msg)
 				if err != nil {
 					log.Errorf("failed to handler message: %v", err)
 				}

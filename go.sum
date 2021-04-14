@@ -313,8 +313,8 @@ github.com/filecoin-project/specs-actors/v3 v3.1.0/go.mod h1:mpynccOLlIRy0QnR008
 github.com/filecoin-project/specs-storage v0.1.1-0.20201105051918-5188d9774506 h1:Ur/l2+6qN+lQiqjozWWc5p9UDaAMDZKTlDS98oRnlIw=
 github.com/filecoin-project/specs-storage v0.1.1-0.20201105051918-5188d9774506/go.mod h1:nJRRM7Aa9XVvygr3W9k6xGF46RWzr2zxF/iGoAIfA/g=
 github.com/filecoin-project/test-vectors/schema v0.0.5/go.mod h1:iQ9QXLpYWL3m7warwvK1JC/pTri8mnfEmKygNDqqY6E=
-github.com/filepp/go-ipfs v0.8.1-0.20210414014049-f9829add8e0b h1:ogsFUQJzCYpEaXyeFsg9hthVvz5ZLrFIpv1qSzK+z68=
-github.com/filepp/go-ipfs v0.8.1-0.20210414014049-f9829add8e0b/go.mod h1:VkX0b0gJ8kJd2rR7oIlJMCcRY0iqn9Rzh8EOnJWYeLQ=
+github.com/filepp/go-ipfs v0.8.1-0.20210414070449-cfbbc55cf8ed h1:jWCVt0lM5sxzGCfsL/23ZudqdxiHqrlf79mzwMjYidY=
+github.com/filepp/go-ipfs v0.8.1-0.20210414070449-cfbbc55cf8ed/go.mod h1:VkX0b0gJ8kJd2rR7oIlJMCcRY0iqn9Rzh8EOnJWYeLQ=
 github.com/flynn/go-shlex v0.0.0-20150515145356-3f9db97f8568/go.mod h1:xEzjJPgXI435gkrCt3MPfRiAkVrwSbHsst4LCFVfpJc=
 github.com/flynn/noise v0.0.0-20180327030543-2492fe189ae6 h1:u/UEqS66A5ckRmS4yNpjmVH56sVtS/RfclBAYocb4as=
 github.com/flynn/noise v0.0.0-20180327030543-2492fe189ae6/go.mod h1:1i71OnUq3iUe1ma7Lr6yG6/rjvM3emb6yoL7xLFzcVQ=

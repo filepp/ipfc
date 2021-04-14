@@ -28,6 +28,6 @@ require (
 )
 
 replace (
-	github.com/ipfs/go-ipfs v0.8.0 => github.com/filepp/go-ipfs v0.8.1-0.20210414014049-f9829add8e0b
+	github.com/ipfs/go-ipfs v0.8.0 => github.com/filepp/go-ipfs v0.8.1-0.20210414070449-cfbbc55cf8ed
 	github.com/ipfs/go-log/v2 v2.1.2 => github.com/liyue201/go-log/v2 v2.1.2-0.20210312022747-08ac38b3a792
 )

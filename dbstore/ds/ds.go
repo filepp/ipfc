@@ -33,12 +33,35 @@ func (s *DbStore) CreateMiner(miner *model.Miner) error {
 	return ret.Error
 }
 
+func (s *DbStore) UpdateMiner(miner *model.Miner) error {
+	mm := map[string]interface{}{}
+	mm["address"] = miner.Address
+	mm["role"] = miner.Role
+	mm["last_active_at"] = miner.LastActiveAt
+
+	ret := s.db.Model(&model.Miner{}).Where("id=?", miner.Id).Updates(mm)
+	if ret.Error != nil {
+		log.Errorf("%v", ret.Error.Error())
+		return ret.Error
+	}
+	return nil
+}
+
 func (s *DbStore) GetMiner(id string) (miner model.Miner, err error) {
 	ret := s.db.Model(&model.Miner{}).Where("id=?", id).First(&miner)
 	if ret.Error != nil {
 		log.Errorf("failed to get miner: %v", ret.Error)
 	}
 	return miner, ret.Error
+}
+
+func (s *DbStore) MinerExist(id string) bool {
+	var miner model.Miner
+	ret := s.db.Model(&model.Miner{}).Where("id=?", id).First(&miner)
+	if ret.Error != nil {
+		return false
+	}
+	return true
 }
 
 func (s *DbStore) GetMiners(role, state, limit, offset int) (list []*model.Miner, err error) {

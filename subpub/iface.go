@@ -7,7 +7,3 @@ import (
 )
 
 type HandleFunc func(ctx context.Context, receivedFrom peer.ID, msg *proto.Message) error
-
-type MessageHandler interface {
-	Handle(ctx context.Context, receivedFrom peer.ID, msg *proto.Message) error
-}

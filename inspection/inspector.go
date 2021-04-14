@@ -3,6 +3,7 @@ package inspection
 import (
 	"context"
 	httpapi "github.com/ipfs/go-ipfs-http-client"
+	"github.com/ipfs/go-ipfs/miner/proto"
 	ma "github.com/multiformats/go-multiaddr"
 	"ipfc/dbstore/ds"
 	"ipfc/subpub"
@@ -13,13 +14,13 @@ import (
 type Inspector struct {
 	sync.RWMutex
 	ipfsApi    *httpapi.HttpApi
-	db         *ds.DbStore
+	store      *ds.DbStore
 	subscriber *subpub.Subscriber
 	wg         sync.WaitGroup
 	cancel     context.CancelFunc
 }
 
-func NewInspector(peerId, addr string, db *ds.DbStore) (*Inspector, error) {
+func NewInspector(peerId, addr string, store *ds.DbStore) (*Inspector, error) {
 	maddr, err := ma.NewMultiaddr(addr)
 	if err != nil {
 		return nil, err
@@ -28,12 +29,14 @@ func NewInspector(peerId, addr string, db *ds.DbStore) (*Inspector, error) {
 	if err != nil {
 		return nil, err
 	}
-	subscriber := subpub.NewSubscriber(peerId, ipfsApi, NewV1Handler(ipfsApi))
-	subscriber.Subscribe()
+	handler := NewV1Handler(ipfsApi, store)
 
+	subscriber := subpub.NewSubscriber(ipfsApi)
+	subscriber.Subscribe(proto.V1MinerHeartBeatTopic(), handler.Handle)
+	subscriber.Subscribe(proto.V1ExternalTopic(peerId), handler.Handle)
 	return &Inspector{
 		ipfsApi:    ipfsApi,
-		db:         db,
+		store:      store,
 		subscriber: subscriber,
 	}, nil
 }
