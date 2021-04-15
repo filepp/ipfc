@@ -12,12 +12,12 @@ make build
 ```
 IPFC
 ```
-clone https://github.com/filepp/go-ipfs
-make build
+https://git.filep.vip/ruitai/ipfc
+make
 ```
 
 ### 部署中心节点
-运行ipfs，需要指定矿工钱包地址
+运行ipfs，需要指定矿工钱包地址和矿工角色,(0代表中心节点)
 ```
 ipfs init
 ipfs daemon --enable-pubsub-experiment=true --enable-mining=true --wallet-address=0x3a9e6cf4e3157670a3b991c25d6f4fcbd9419c03 --miner-role=0
@@ -31,7 +31,7 @@ ipfs daemon --enable-pubsub-experiment=true --enable-mining=true --wallet-addres
 ```
 
 ### 边沿节点
-运行边沿节点，需要指定矿工钱包地址
+运行边沿节点，需要指定矿工钱包地址和矿工角色，(1代表边沿节点)
 ```
 ipfs init
 ipfs daemon --enable-pubsub-experiment=true --enable-mining=true --wallet-address=0x3a9e6cf4e3157670a3b991c25d6f4fcbd9419c03 --miner-role=1
@@ -43,6 +43,7 @@ ipfs daemon --enable-pubsub-experiment=true --enable-mining=true --wallet-addres
 ipfs init
 ipfs daemon --enable-pubsub-experiment=true
 ```
+
 运行inspector
 ```
 ./inspector
