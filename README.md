@@ -2,28 +2,48 @@
 
 IPFC（Inter-Planetary File Cache） 星际文件缓存
 
-![](docs/ipfc.png)
+![](docs/image/topology.jpg)
 
-### 安装依赖
-
-### IPFS
-[部署IPFS](docs/IPFS.md)
-
-### Lotus
-安装（略）  
-获取地址
+### 编译代码
+IPFS
 ```
-lotus auth api-info --perm admin
+clone https://github.com/filepp/go-ipfs
+make build
+```
+IPFC
+```
+clone https://github.com/filepp/go-ipfs
+make build
 ```
 
-### 部署IPFC
-编译代码
+### 部署中心节点
+运行ipfs，需要指定矿工钱包地址
 ```
-make
+ipfs init
+ipfs daemon --enable-pubsub-experiment=true --enable-mining=true --wallet-address=0x3a9e6cf4e3157670a3b991c25d6f4fcbd9419c03 --miner-role=0
 ```
-修改配置 `conf/ipfc.yaml`
+运行lotus（略）
 
-运行IPFC，(IPFC和lotus必须运行同一台主机上，或者将IPFC的文件目录挂载到lotus主机上)
+运行ipfc, 需修改配置 `resource/ipfc.yaml`
+运行ipfc，(ipfc和lotus必须运行同一台主机上，或者将IPFC的文件目录挂载到lotus主机上)
 ```
 ./ipfc
+```
+
+### 边沿节点
+运行边沿节点，需要指定矿工钱包地址
+```
+ipfs init
+ipfs daemon --enable-pubsub-experiment=true --enable-mining=true --wallet-address=0x3a9e6cf4e3157670a3b991c25d6f4fcbd9419c03 --miner-role=1
+```
+
+### 巡检节点
+运行ipfs
+```
+ipfs init
+ipfs daemon --enable-pubsub-experiment=true
+```
+运行inspector
+```
+./inspector
 ```
