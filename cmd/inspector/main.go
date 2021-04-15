@@ -4,9 +4,11 @@ import (
 	logging "github.com/ipfs/go-log/v2"
 	"github.com/liyue201/golib/xreflect"
 	"github.com/liyue201/golib/xsignal"
+	badger "github.com/ipfs/go-ds-badger2"
 	"ipfc/config"
 	"ipfc/dbstore/ds"
 	"ipfc/inspection"
+	"ipfc/storage/repo"
 	"ipfc/utils/xgorm"
 )
 
@@ -21,8 +23,15 @@ func main() {
 	db := dbConf.Build()
 	defer db.Close()
 
+	repository := repo.NewRepository(conf.Repo.Dir)
+	localStore, err := badger.NewDatastore(repository.GetDataStoreDir(), &badger.DefaultOptions)
+	if err != nil {
+		log.Errorf("failed to new datastore: %v", err)
+		return
+	}
+
 	dbStore := ds.NewDbStore(db)
-	inspector, err := inspection.NewInspector(conf.Ipfs.PeerId, conf.Ipfs.ApiAddr, dbStore)
+	inspector, err := inspection.NewInspector(conf.Ipfs.PeerId, conf.Ipfs.ApiAddr, dbStore, localStore)
 	if err != nil {
 		log.Errorf("failed to new ipfs inspector: %v", err)
 		return

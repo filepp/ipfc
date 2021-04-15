@@ -3,6 +3,7 @@ package inspection
 import (
 	"context"
 	"errors"
+	ds2 "github.com/ipfs/go-datastore"
 	"github.com/ipfs/go-ipfs/miner/proto"
 	"github.com/ipfs/interface-go-ipfs-core"
 	"github.com/libp2p/go-libp2p-core/peer"
@@ -15,13 +16,15 @@ import (
 type V1Handler struct {
 	api        iface.CoreAPI
 	store      *ds.DbStore
+	localStore ds2.Datastore
 	handleFunc map[string]subpub.HandleFunc
 }
 
-func NewV1Handler(api iface.CoreAPI, store *ds.DbStore) *V1Handler {
+func NewV1Handler(api iface.CoreAPI, store *ds.DbStore, localStore ds2.Datastore) *V1Handler {
 	h := &V1Handler{
 		api:        api,
 		store:      store,
+		localStore: localStore,
 		handleFunc: make(map[string]subpub.HandleFunc),
 	}
 	h.handleFunc[proto.MsgMinerHeartBeat] = h.HandleMinerHeartBeat
@@ -41,6 +44,7 @@ func (h *V1Handler) HandleMinerHeartBeat(ctx context.Context, receivedFrom peer.
 	log.Infof("HandleMinerHeartBeat: %v,  %+v", receivedFrom.String(), msg)
 	hbMsg, ok := msg.Data.(proto.MinerHartBeat)
 	if !ok {
+		log.Errorf("proto error")
 		return errors.New("proto error")
 	}
 	//todo: check WalletAddress
@@ -64,7 +68,24 @@ func (h *V1Handler) HandleMinerHeartBeat(ctx context.Context, receivedFrom peer.
 }
 
 func (h *V1Handler) HandleWindowPostResp(ctx context.Context, receivedFrom peer.ID, msg *proto.Message) error {
-	//todo:
 	log.Infof("HandleWindowPostResp: %+v", msg)
+
+	wndPostResp, ok := msg.Data.(proto.WindowPostResp)
+	if !ok {
+		log.Errorf("proto error")
+		return errors.New("proto error")
+	}
+	wndPostReq, err := getWindowPostMessage(h.localStore, receivedFrom.String(), msg.Nonce)
+	if err != nil {
+		log.Errorf("failed to get wndPostMsg: %v, %v %v", err, receivedFrom.String(), msg.Nonce)
+		return err
+	}
+	err = h.verifyWindowPost(ctx, &wndPostReq, &wndPostResp)
+	deleteWindowPostMessage(h.localStore, receivedFrom.String(), msg.Nonce)
+	return err
+}
+
+func (h *V1Handler) verifyWindowPost(ctx context.Context, wndPostReq *proto.WindowPostReq, wndPostResp *proto.WindowPostResp) error {
+	// todo: 校验时空证明
 	return nil
 }

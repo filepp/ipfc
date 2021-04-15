@@ -3,6 +3,7 @@ package inspection
 import (
 	"context"
 	"github.com/ipfs/go-cid"
+	ds2 "github.com/ipfs/go-datastore"
 	httpapi "github.com/ipfs/go-ipfs-http-client"
 	"github.com/ipfs/go-ipfs/miner/proto"
 	logging "github.com/ipfs/go-log/v2"
@@ -27,12 +28,13 @@ type Inspector struct {
 	sync.RWMutex
 	ipfsApi    *httpapi.HttpApi
 	store      *ds.DbStore
+	localStore ds2.Datastore
 	subscriber *subpub.Subscriber
 	wg         sync.WaitGroup
 	cancel     context.CancelFunc
 }
 
-func NewInspector(peerId, addr string, store *ds.DbStore) (*Inspector, error) {
+func NewInspector(peerId, addr string, store *ds.DbStore, localStore ds2.Datastore) (*Inspector, error) {
 	maddr, err := ma.NewMultiaddr(addr)
 	if err != nil {
 		return nil, err
@@ -41,7 +43,7 @@ func NewInspector(peerId, addr string, store *ds.DbStore) (*Inspector, error) {
 	if err != nil {
 		return nil, err
 	}
-	handler := NewV1Handler(ipfsApi, store)
+	handler := NewV1Handler(ipfsApi, store, localStore)
 
 	subscriber := subpub.NewSubscriber(ipfsApi)
 	subscriber.Subscribe(proto.V1MinerHeartBeatTopic(), handler.Handle)
@@ -49,6 +51,7 @@ func NewInspector(peerId, addr string, store *ds.DbStore) (*Inspector, error) {
 	return &Inspector{
 		ipfsApi:    ipfsApi,
 		store:      store,
+		localStore: localStore,
 		subscriber: subscriber,
 	}, nil
 }
@@ -117,7 +120,6 @@ func (m *Inspector) inspectMiner(ctx context.Context, miner *model.Miner) error 
 		log.Errorf("failed to get miner files")
 		return err
 	}
-	log.Infof("%v", files)
 	if len(files) == 0 {
 		return nil
 	}
@@ -138,10 +140,10 @@ func (m *Inspector) inspectMiner(ctx context.Context, miner *model.Miner) error 
 			Positions: genRandomPositions(file.Size, RandomPositionNum),
 		})
 	}
-
+	msgId := xrand.GenNonce()
 	msg := proto.Message{
 		Type:  proto.MsgWindowPost,
-		Nonce: xrand.GenNonce(),
+		Nonce: msgId,
 		Data:  req,
 	}
 	data, _ := msg.EncodeMessage()
@@ -150,6 +152,7 @@ func (m *Inspector) inspectMiner(ctx context.Context, miner *model.Miner) error 
 		log.Errorf("failed to publish: %v", err)
 		return err
 	}
+	saveWindowPostMessage(m.localStore, miner.Id,  msgId, req)
 	return nil
 }
 
