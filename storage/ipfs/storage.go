@@ -2,7 +2,6 @@ package ipfs
 
 import (
 	"context"
-	"github.com/gofrs/uuid"
 	"github.com/ipfs/go-cid"
 	files "github.com/ipfs/go-ipfs-files"
 	"github.com/ipfs/go-ipfs-http-client"
@@ -17,8 +16,8 @@ import (
 	"ipfc/dbstore/model"
 	"ipfc/storage/types"
 	"ipfc/subpub"
+	"ipfc/utils/xrand"
 	"os"
-	"strings"
 	"sync"
 	"time"
 )
@@ -30,6 +29,7 @@ type Storage struct {
 	ipfsApi    *httpapi.HttpApi
 	db         *ds.DbStore
 	subscriber *subpub.Subscriber
+	peerId     string
 	replicas   int
 }
 
@@ -50,6 +50,7 @@ func NewStorage(peerId, addr string, replicas int, db *ds.DbStore) (*Storage, er
 		ipfsApi:    ipfsApi,
 		db:         db,
 		subscriber: subscriber,
+		peerId:     peerId,
 		replicas:   replicas,
 	}, nil
 }
@@ -60,6 +61,13 @@ func (s *Storage) AddFile(ctx context.Context, filePath string) (cid.Cid, error)
 		log.Errorf("%v, filePath=%v", err.Error(), filePath)
 		return cid.Undef, err
 	}
+	size := int64(0)
+	if fileStat, err := file.Stat(); err == nil {
+		size = fileStat.Size()
+	} else {
+		log.Warnf("file stat: %v", err)
+	}
+
 	fileNode := files.NewReaderFile(file)
 	resolved, err := s.ipfsApi.Unixfs().Add(ctx, fileNode, options.Unixfs.Pin(true))
 	if err != nil {
@@ -70,9 +78,11 @@ func (s *Storage) AddFile(ctx context.Context, filePath string) (cid.Cid, error)
 
 	mfile := &model.File{
 		Cid:       resolved.Cid().String(),
+		Size:      size,
 		State:     0,
 		CreatedAt: time.Now().Unix(),
 	}
+
 	if s.db.FileExist(mfile.Cid) {
 		return resolved.Cid(), nil
 	}
@@ -80,8 +90,20 @@ func (s *Storage) AddFile(ctx context.Context, filePath string) (cid.Cid, error)
 	if err != nil {
 		return resolved.Root(), err
 	}
-	s.syncToOtherPeers(ctx, resolved.Cid())
+	peerIds, _ := s.syncToOtherPeers(ctx, resolved.Cid())
 
+	var mfiles []model.MinerFile
+	mfiles = append(mfiles, model.MinerFile{
+		MinerId: s.peerId,
+		FileCid: resolved.Cid().String(),
+	})
+	for _, peerId := range peerIds {
+		mfiles = append(mfiles, model.MinerFile{
+			MinerId: peerId.String(),
+			FileCid: resolved.Cid().String(),
+		})
+	}
+	err = s.db.CreateMinerFiles(mfiles)
 	return resolved.Cid(), nil
 }
 
@@ -104,39 +126,31 @@ func (s *Storage) RetrieveFile(ctx context.Context, fileCid cid.Cid, outputPath 
 
 // 备份数据
 // 给其他节点发消息, 其他节点收到消息后同步数据
-func (s *Storage) syncToOtherPeers(ctx context.Context, fileCid cid.Cid) error {
+func (s *Storage) syncToOtherPeers(ctx context.Context, fileCid cid.Cid) (peerIds []peer.ID, err error) {
 	peers, err := s.ipfsApi.Swarm().Peers(ctx)
 	if err != nil {
 		log.Errorf("failed to get peers: %v", err.Error())
-		return err
+		return nil, err
 	}
 
 	//todo: 根据节点的容量等判断
 	selector := NewPeerSelector()
-	peers, _ = selector.GetPeers(ctx, s.filterPeers(s.allMiners(), peers), s.replicas)
-	var mfiles []model.MinerFile
+	peers, _ = selector.GetPeers(ctx, s.filterPeers(s.allMiners(), peers), s.replicas-1)
 	for _, peer := range peers {
 		err := s.publishFetchMessage(ctx, peer.ID(), fileCid)
 		if err != nil {
 			continue
 		}
-		mfiles = append(mfiles, model.MinerFile{
-			MinerId: peer.ID().String(),
-			FileCid: fileCid.String(),
-			State:   0,
-		})
+		peerIds = append(peerIds, peer.ID())
 	}
-	if len(mfiles) > 0 {
-		err = s.db.CreateMinerFiles(mfiles)
-	}
-	return err
+	return peerIds, err
 }
 
 func (s *Storage) publishFetchMessage(ctx context.Context, id peer.ID, fileCid cid.Cid) error {
 	topic := proto.V1InternalTopic(id.String())
 	msg := proto.Message{
 		Type:  proto.MsgFetchFile,
-		Nonce: s.genNonce(),
+		Nonce: xrand.GenNonce(),
 		Data: proto.FetchFileReq{
 			Cid: fileCid,
 		},
@@ -148,11 +162,6 @@ func (s *Storage) publishFetchMessage(ctx context.Context, id peer.ID, fileCid c
 		return err
 	}
 	return err
-}
-
-func (s *Storage) genNonce() string {
-	nonce, _ := uuid.NewV4()
-	return strings.ReplaceAll(nonce.String(), "-", "")
 }
 
 func (s *Storage) allMiners() map[string]*model.Miner {

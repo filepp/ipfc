@@ -2,13 +2,25 @@ package inspection
 
 import (
 	"context"
+	"github.com/ipfs/go-cid"
 	httpapi "github.com/ipfs/go-ipfs-http-client"
 	"github.com/ipfs/go-ipfs/miner/proto"
+	logging "github.com/ipfs/go-log/v2"
 	ma "github.com/multiformats/go-multiaddr"
 	"ipfc/dbstore/ds"
+	"ipfc/dbstore/model"
 	"ipfc/subpub"
+	"ipfc/utils/xrand"
+	"math/rand"
+	"sort"
 	"sync"
 	"time"
+)
+
+var log = logging.Logger("inspection")
+
+const (
+	RandomPositionNum = 10
 )
 
 type Inspector struct {
@@ -41,32 +53,126 @@ func NewInspector(peerId, addr string, store *ds.DbStore) (*Inspector, error) {
 	}, nil
 }
 
-func (i *Inspector) Run() {
+func (m *Inspector) Run() {
 	ctx, cancel := context.WithCancel(context.Background())
-	i.cancel = cancel
-	i.wg.Add(1)
+	m.cancel = cancel
+	m.wg.Add(1)
 	go func() {
 		defer func() {
-			i.wg.Done()
+			m.wg.Done()
 		}()
-		ticker := time.NewTicker(time.Hour * 2)
+
+		// 两个小时一次巡检，一天做12次, UTC时间0点为分割点
+		slots := [12]bool{}
+		preTwoHour := int(time.Now().Unix() / 60 / 60 / 2)
+		ticker := time.NewTicker(time.Second)
 		defer ticker.Stop()
 		for {
 			select {
 			case <-ctx.Done():
 				return
 			case <-ticker.C:
-				i.doInspect(ctx)
+				twoHour := int(time.Now().Unix() / 60 / 60 / 2)
+				if preTwoHour != twoHour && twoHour%12 == 0 {
+					// 新的一天开始, 清零
+					slots = [12]bool{}
+				}
+				if slots[twoHour%12] {
+					continue
+				}
+				m.inspect(ctx)
+				slots[twoHour%12] = true
 			}
 		}
 	}()
 }
 
-func (i *Inspector) Stop() {
-	i.cancel()
-	i.wg.Wait()
+func (m *Inspector) Stop() {
+	m.cancel()
+	m.wg.Wait()
 }
 
-func (i *Inspector) doInspect(ctx context.Context) {
+func (m *Inspector) inspect(ctx context.Context) {
+	miners, err := m.store.GetAllMiners(-1, -1)
+	if err != nil {
+		log.Errorf("failed to get miners")
+		return
+	}
+	for _, miner := range miners {
+		select {
+		case <-ctx.Done():
+			return
+		default:
+		}
+		err := m.inspectMiner(ctx, miner)
+		if err != nil {
+			return
+		}
+	}
+}
 
+func (m *Inspector) inspectMiner(ctx context.Context, miner *model.Miner) error {
+	files, err := m.store.GetMinerFiles(miner.Id)
+	if err != nil {
+		log.Errorf("failed to get miner files")
+		return err
+	}
+	log.Infof("%v", files)
+	if len(files) == 0 {
+		return nil
+	}
+	req := proto.WindowPostReq{
+		Items: make([]proto.WindowPostReqItem, 0),
+	}
+	for _, file := range files {
+		if file.Size == 0 {
+			continue
+		}
+		fileCid, err := cid.Decode(file.FileCid)
+		if err != nil {
+			log.Errorf("failed to decode cid: %v", err)
+			continue
+		}
+		req.Items = append(req.Items, proto.WindowPostReqItem{
+			FileCid:   fileCid,
+			Positions: genRandomPositions(file.Size, RandomPositionNum),
+		})
+	}
+
+	msg := proto.Message{
+		Type:  proto.MsgWindowPost,
+		Nonce: xrand.GenNonce(),
+		Data:  req,
+	}
+	data, _ := msg.EncodeMessage()
+	err = m.ipfsApi.PubSub().Publish(ctx, proto.V1InternalTopic(miner.Id), data)
+	if err != nil {
+		log.Errorf("failed to publish: %v", err)
+		return err
+	}
+	return nil
+}
+
+func genRandomPositions(size, num int64) []int64 {
+	positions := make([]int64, 0)
+	if size <= num {
+		for i := int64(0); i < size; i++ {
+			positions = append(positions, i)
+		}
+		return positions
+	}
+	mark := make(map[int64]struct{})
+	for i := 0; i < int(num); {
+		pos := rand.Int63n(size) % size
+		if _, ok := mark[pos]; ok {
+			continue
+		}
+		positions = append(positions, pos)
+		mark[pos] = struct{}{}
+		i++
+	}
+	sort.Slice(positions, func(i, j int) bool {
+		return positions[i] < positions[j]
+	})
+	return positions
 }

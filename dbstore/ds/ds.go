@@ -1,6 +1,7 @@
 package ds
 
 import (
+	"fmt"
 	logging "github.com/ipfs/go-log/v2"
 	"github.com/jinzhu/gorm"
 	"ipfc/dbstore/model"
@@ -122,4 +123,15 @@ func (s *DbStore) CreateMinerFiles(files []model.MinerFile) (err error) {
 		}
 	}
 	return nil
+}
+
+func (s *DbStore) GetMinerFiles(mineId string) (minerFiles []*MinerFile, err error) {
+	//SELECT mf.miner_id, mf.file_cid, f.size from miner_file mf inner join file f on  mf.miner_id = '12D3KooWRee6wn2LtpN1WYsj57avMFDYWbJ2479JnvQG5pm6RztS' and mf.file_cid = f.cid  ;
+	sqlFmt := "SELECT mf.miner_id, mf.file_cid, f.size from miner_file mf inner join file f on  mf.miner_id = '%v' and mf.file_cid = f.cid"
+	sqlStr := fmt.Sprintf(sqlFmt, mineId)
+	ret := s.db.Raw(sqlStr).Scan(&minerFiles)
+	if ret.Error != nil {
+		log.Errorf("%v", ret.Error.Error())
+	}
+	return minerFiles, ret.Error
 }

@@ -6,7 +6,6 @@ import (
 	"github.com/ipfs/go-ipfs/miner/proto"
 	"github.com/ipfs/interface-go-ipfs-core"
 	"github.com/libp2p/go-libp2p-core/peer"
-	"github.com/prometheus/common/log"
 	"ipfc/dbstore/ds"
 	"ipfc/dbstore/model"
 	"ipfc/subpub"
