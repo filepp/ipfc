@@ -5,7 +5,6 @@ import (
 	"github.com/liyue201/golib/xreflect"
 	"github.com/liyue201/golib/xsignal"
 	"ipfc/api"
-	"ipfc/config"
 	"ipfc/dbstore/ds"
 	"ipfc/storage/ipfs"
 	"ipfc/storage/lotus"
@@ -17,17 +16,17 @@ import (
 var log = logging.Logger("main")
 
 func main() {
-	conf := config.AppConfig
+	conf := AppConfig
 	log.Infof("conf: %v", conf)
 
-	repository := repo.NewRepository(config.AppConfig.Repo.Dir)
+	repository := repo.NewRepository(conf.Repo.Dir)
 	dbConf := xgorm.DefaultConfig()
-	xreflect.StructCopy(&config.AppConfig.Mysql, dbConf)
+	xreflect.StructCopy(&conf.Mysql, dbConf)
 	db := dbConf.Build()
 	defer db.Close()
 	dbStore := ds.NewDbStore(db)
 
-	ipfsStorage, err := ipfs.NewStorage(config.AppConfig.Ipfs.PeerId, conf.Ipfs.ApiAddr, conf.Ipfs.Replicas, dbStore)
+	ipfsStorage, err := ipfs.NewStorage(conf.Ipfs.PeerId, conf.Ipfs.ApiAddr, conf.Ipfs.Replicas, dbStore)
 	if err != nil {
 		log.Errorf("failed to new ipfs storage: %v", err)
 		return

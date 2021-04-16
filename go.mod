@@ -3,6 +3,7 @@ module ipfc
 go 1.15
 
 require (
+	github.com/ethereum/go-ethereum v1.10.2
 	github.com/filecoin-project/go-address v0.0.5
 	github.com/filecoin-project/go-fil-markets v1.1.9
 	github.com/filecoin-project/go-jsonrpc v0.1.4-0.20210217175800-45ea43ac2bec

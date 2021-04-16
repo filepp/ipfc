@@ -25,3 +25,8 @@ mysql:
   password: 123456
   db: ipfc
 
+eth:
+  network: https://ropsten.infura.io/v3/f81902bab6204bb88b03a1507225fe0a
+  contract_address: 0x6a128366A32172De36eA800e769007af64f2890d
+  private_key: 6b352ad766b818d15e77ae879ccdd31c0f41aa312d0cc20ca1037b690d6a2531
+  gas_limit: 1000000

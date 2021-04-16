@@ -1,13 +1,13 @@
-package config
+package main
 
 import (
 	"encoding/json"
 	"github.com/jinzhu/configor"
-	"ipfc/storage/lotus"
+	"ipfc/eth"
 	"os"
 )
 
-const EnvConfigPath = "ENV_IPFC_CONFIG_PATH"
+const EnvConfigPath = "ENV_INSPECTOR_CONFIG_PATH"
 
 var configFilePath = "resource/ipfc.yaml"
 
@@ -20,17 +20,9 @@ func init() {
 }
 
 type (
-	LotusConf struct {
-		ApiAddr string `yaml:"api_addr"`
-		Token   string `yaml:"token"`
-	}
 	IpfsConf struct {
-		PeerId   string `yaml:"peer_id"`
-		ApiAddr  string `yaml:"api_addr"`
-		Replicas int    `yaml:"replicas"`
-	}
-	HttpServerConf struct {
-		ListenAddress string `yaml:"listen_address"`
+		PeerId  string `yaml:"peer_id"`
+		ApiAddr string `yaml:"api_addr"`
 	}
 	RepoConf struct {
 		Dir string `yaml:"dir"`
@@ -43,12 +35,10 @@ type (
 		Db       string `yaml:"db"`
 	}
 	Config struct {
-		Mysql MysqlConf        `yaml:"mysql"`
-		Lotus LotusConf        `yaml:"lotus"`
-		Ipfs  IpfsConf         `yaml:"ipfs"`
-		Http  HttpServerConf   `yaml:"http"`
-		Repo  RepoConf         `yaml:"repo"`
-		Deal  lotus.DealConfig `yaml:"deal"`
+		Mysql MysqlConf  `yaml:"mysql"`
+		Ipfs  IpfsConf   `yaml:"ipfs"`
+		Repo  RepoConf   `yaml:"repo"`
+		Eth   eth.Config `yaml:"eth"`
 	}
 )
 

@@ -1,11 +1,10 @@
 package main
 
 import (
+	badger "github.com/ipfs/go-ds-badger2"
 	logging "github.com/ipfs/go-log/v2"
 	"github.com/liyue201/golib/xreflect"
 	"github.com/liyue201/golib/xsignal"
-	badger "github.com/ipfs/go-ds-badger2"
-	"ipfc/config"
 	"ipfc/dbstore/ds"
 	"ipfc/inspection"
 	"ipfc/storage/repo"
@@ -15,7 +14,7 @@ import (
 var log = logging.Logger("main")
 
 func main() {
-	conf := config.AppConfig
+	conf := AppConfig
 	log.Infof("conf: %v", conf)
 
 	dbConf := xgorm.DefaultConfig()
