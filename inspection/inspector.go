@@ -21,6 +21,7 @@ import (
 var log = logging.Logger("inspection")
 
 const (
+	InspectFileNum    = 2
 	RandomPositionNum = 10
 )
 
@@ -123,6 +124,8 @@ func (m *Inspector) inspectMiner(ctx context.Context, miner *model.Miner) error 
 	if len(files) == 0 {
 		return nil
 	}
+	files = selectFiles(files, InspectFileNum)
+
 	req := proto.WindowPostReq{
 		Items: make([]proto.WindowPostReqItem, 0),
 	}
@@ -152,8 +155,26 @@ func (m *Inspector) inspectMiner(ctx context.Context, miner *model.Miner) error 
 		log.Errorf("failed to publish: %v", err)
 		return err
 	}
-	saveWindowPostMessage(m.localStore, miner.Id,  msgId, req)
+	saveWindowPostMessage(m.localStore, miner.Id, msgId, req)
 	return nil
+}
+
+func selectFiles(files []*ds.MinerFile, num int) []*ds.MinerFile {
+	selected := make([]*ds.MinerFile, 0)
+	if len(files) <= num {
+		return files
+	}
+	mark := make(map[int]struct{})
+	for i := 0; i < num; {
+		pos := rand.Intn(len(files))
+		if _, ok := mark[pos]; ok {
+			continue
+		}
+		selected = append(selected, files[i])
+		mark[pos] = struct{}{}
+		i++
+	}
+	return selected
 }
 
 func genRandomPositions(size, num int64) []int64 {
