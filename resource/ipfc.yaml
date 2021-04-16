@@ -30,3 +30,6 @@ eth:
   contract_address: 0x6a128366A32172De36eA800e769007af64f2890d
   private_key: 6b352ad766b818d15e77ae879ccdd31c0f41aa312d0cc20ca1037b690d6a2531
   gas_limit: 1000000
+
+reward:
+  amount: 1000

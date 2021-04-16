@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"github.com/jinzhu/configor"
 	"ipfc/eth"
+	"ipfc/reward"
 	"os"
 )
 
@@ -35,10 +36,11 @@ type (
 		Db       string `yaml:"db"`
 	}
 	Config struct {
-		Mysql MysqlConf  `yaml:"mysql"`
-		Ipfs  IpfsConf   `yaml:"ipfs"`
-		Repo  RepoConf   `yaml:"repo"`
-		Eth   eth.Config `yaml:"eth"`
+		Mysql  MysqlConf     `yaml:"mysql"`
+		Ipfs   IpfsConf      `yaml:"ipfs"`
+		Repo   RepoConf      `yaml:"repo"`
+		Eth    eth.Config    `yaml:"eth"`
+		Reward reward.Config `yaml:"reward"`
 	}
 )
 

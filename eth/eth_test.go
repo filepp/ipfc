@@ -6,7 +6,7 @@ import (
 )
 
 func TestTest(t *testing.T) {
-	contract, _ := New(Config{
+	contract, _ := NewContract(Config{
 		Network:         "https://ropsten.infura.io/v3/f81902bab6204bb88b03a1507225fe0a",
 		ContractAddress: "0x16e2f72518099b64bbD592AB0E3943aE9c41b806",
 		PrivateKey: "6b352ad766b818d15e77ae879ccdd31c0f41aa312d0cc20ca1037b690d6a2531",

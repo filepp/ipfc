@@ -29,7 +29,7 @@ type Contract struct {
 	privateKey *ecdsa.PrivateKey
 }
 
-func New(conf Config) (*Contract, error) {
+func NewContract(conf Config) (*Contract, error) {
 	client, err := ethclient.Dial(conf.Network)
 	if err != nil {
 		log.Errorf("Failed to connect to eth: %v", err)
@@ -78,6 +78,15 @@ func (c *Contract) GetSymbol() (string, error) {
 	return s, nil
 }
 
+func (c *Contract) GetDecimals() (uint8, error) {
+	s, err := c.token.Decimals(nil)
+	if err != nil {
+		log.Errorf("failed to get Decimals, %v", err)
+		return 0, err
+	}
+	return s, nil
+}
+
 func (c *Contract) Approve(address string, value *big.Int) (*types.Transaction, error) {
 	opt, err := bind.NewKeyedTransactorWithChainID(c.privateKey, c.chainId)
 	if err != nil {
@@ -86,6 +95,25 @@ func (c *Contract) Approve(address string, value *big.Int) (*types.Transaction, 
 	}
 	opt.GasLimit = c.conf.GasLimit
 	tx, err := c.token.Approval(opt, common.HexToAddress(address), value)
+	if err != nil {
+		log.Errorf("failed to Approval, %v", err)
+		return nil, err
+	}
+	return tx, nil
+}
+
+func (c *Contract) Approves(addresses []string, value []*big.Int) (*types.Transaction, error) {
+	opt, err := bind.NewKeyedTransactorWithChainID(c.privateKey, c.chainId)
+	if err != nil {
+		log.Errorf("failed to NewKeyedTransactorWithChainID, %v", err)
+		return nil, err
+	}
+	opt.GasLimit = c.conf.GasLimit
+	addrs := make([]common.Address, len(addresses))
+	for i, addr := range addresses {
+		addrs[i] = common.HexToAddress(addr)
+	}
+	tx, err := c.token.ApproveWthArray(opt, addrs, value)
 	if err != nil {
 		log.Errorf("failed to Approval, %v", err)
 		return nil, err

@@ -6,7 +6,9 @@ import (
 	"github.com/liyue201/golib/xreflect"
 	"github.com/liyue201/golib/xsignal"
 	"ipfc/dbstore/ds"
+	"ipfc/eth"
 	"ipfc/inspection"
+	"ipfc/reward"
 	"ipfc/storage/repo"
 	"ipfc/utils/xgorm"
 )
@@ -28,6 +30,11 @@ func main() {
 		log.Errorf("failed to new datastore: %v", err)
 		return
 	}
+	contract, err := eth.NewContract(conf.Eth)
+	if err != nil {
+		log.Errorf("failed to new contract: %v", err)
+		return
+	}
 
 	dbStore := ds.NewDbStore(db)
 	inspector, err := inspection.NewInspector(conf.Ipfs.PeerId, conf.Ipfs.ApiAddr, dbStore, localStore)
@@ -37,6 +44,10 @@ func main() {
 	}
 	inspector.Run()
 	defer inspector.Stop()
+
+	cron := reward.NewCron(dbStore, contract, conf.Reward)
+	cron.Run()
+	defer cron.Stop()
 
 	xsignal.Wait()
 }

@@ -23,7 +23,7 @@ func NewDbStore(db *gorm.DB) *DbStore {
 
 func (s *DbStore) init() {
 	s.db.Set("gorm:table_options", "ENGINE=InnoDB").
-		AutoMigrate(&model.Miner{}, &model.File{}, &model.MinerFile{})
+		AutoMigrate(&model.Miner{}, &model.File{}, &model.MinerFile{}, &model.DistributionLog{})
 }
 
 func (s *DbStore) CreateMiner(miner *model.Miner) error {
@@ -134,4 +134,22 @@ func (s *DbStore) GetMinerFiles(mineId string) (minerFiles []*MinerFile, err err
 		log.Errorf("%v", ret.Error.Error())
 	}
 	return minerFiles, ret.Error
+}
+
+func (s *DbStore) CreateDistributionLog(item *model.DistributionLog) error {
+	ret := s.db.Create(item)
+	if ret.Error != nil {
+		log.Errorf("failed to create approveLog: %v", ret.Error)
+	}
+	return ret.Error
+}
+
+func (s *DbStore) GetLastDistributionLog() (*model.DistributionLog, error) {
+	var item model.DistributionLog
+	ret := s.db.Model(&model.DistributionLog{}).Order("id DESC").First(&item)
+	if ret.Error != nil {
+		log.Errorf("failed to get approve: %v", ret.Error)
+		return nil, ret.Error
+	}
+	return &item, nil
 }
