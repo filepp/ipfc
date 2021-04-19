@@ -48,7 +48,7 @@ func NewInspector(peerId, addr string, store *ds.DbStore, localStore ds2.Datasto
 
 	subscriber := subpub.NewSubscriber(ipfsApi)
 	subscriber.Subscribe(proto.V1MinerHeartBeatTopic(), handler.Handle)
-	subscriber.Subscribe(proto.V1ExternalTopic(peerId), handler.Handle)
+	subscriber.Subscribe(proto.V1InspectorTopic(peerId), handler.Handle)
 	return &Inspector{
 		ipfsApi:    ipfsApi,
 		store:      store,

@@ -44,7 +44,7 @@ func NewStorage(peerId, addr string, replicas int, db *ds.DbStore) (*Storage, er
 	}
 	subscriber := subpub.NewSubscriber(ipfsApi)
 	handler := NewV1Handler(ipfsApi)
-	subscriber.Subscribe(proto.V1ExternalTopic(peerId), handler.Handle)
+	subscriber.Subscribe(proto.V1IpfcTopic(peerId), handler.Handle)
 
 	return &Storage{
 		ipfsApi:    ipfsApi,
