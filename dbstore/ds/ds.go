@@ -23,7 +23,8 @@ func NewDbStore(db *gorm.DB) *DbStore {
 
 func (s *DbStore) init() {
 	s.db.Set("gorm:table_options", "ENGINE=InnoDB").
-		AutoMigrate(&model.Miner{}, &model.File{}, &model.MinerFile{}, &model.DistributionLog{})
+		AutoMigrate(&model.Miner{}, &model.File{}, &model.MinerFile{},
+			&model.DistributionLog{}, &model.WindowPost{})
 }
 
 func (s *DbStore) CreateMiner(miner *model.Miner) error {
@@ -152,4 +153,12 @@ func (s *DbStore) GetLastDistributionLog() (*model.DistributionLog, error) {
 		return nil, ret.Error
 	}
 	return &item, nil
+}
+
+func (s *DbStore) SaveWindowPost(wndPost *model.WindowPost) error {
+	ret := s.db.Create(wndPost)
+	if ret.Error != nil {
+		log.Errorf("failed to save wndPost: %v", ret.Error)
+	}
+	return ret.Error
 }
