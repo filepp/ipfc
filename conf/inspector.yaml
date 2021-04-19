@@ -1,0 +1,23 @@
+repo:
+  dir: /data/ipfc_data
+
+ipfs:
+  peer_id: 12D3KooWP7We1ubNk7U7iQNUihZeDgtcVy8fRQPhVBQs6pjHawm4
+  api_addr: /ip4/192.168.3.201/tcp/5001
+  replicas: 3
+
+mysql:
+  host: 192.168.3.201
+  port: 3306
+  user: root
+  password: 123456
+  db: ipfc
+
+eth:
+  network: https://ropsten.infura.io/v3/f81902bab6204bb88b03a1507225fe0a
+  contract_address: 0x6a128366A32172De36eA800e769007af64f2890d
+  private_key: 6b352ad766b818d15e77ae879ccdd31c0f41aa312d0cc20ca1037b690d6a2531
+  gas_limit: 1000000
+
+reward:
+  amount: 1000
