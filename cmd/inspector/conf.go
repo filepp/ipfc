@@ -10,7 +10,7 @@ import (
 
 const EnvConfigPath = "ENV_INSPECTOR_CONFIG_PATH"
 
-var configFilePath = "resource/ipfc.yaml"
+var configFilePath = "conf/inspector.yaml"
 
 func init() {
 	path := os.Getenv(EnvConfigPath)

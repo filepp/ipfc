@@ -9,7 +9,7 @@ import (
 
 const EnvConfigPath = "ENV_IPFC_CONFIG_PATH"
 
-var configFilePath = "resource/ipfc.yaml"
+var configFilePath = "conf/ipfc.yaml"
 
 func init() {
 	path := os.Getenv(EnvConfigPath)
