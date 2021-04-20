@@ -97,7 +97,7 @@ func (m *Inspector) Stop() {
 }
 
 func (m *Inspector) inspect(ctx context.Context) {
-	miners, err := m.store.GetAllMiners(-1, -1)
+	miners, err := m.store.GetAllMiners(model.RoleEdgeNode, -1)
 	if err != nil {
 		log.Errorf("failed to get miners")
 		return

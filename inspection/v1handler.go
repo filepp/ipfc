@@ -52,16 +52,11 @@ func (h *V1Handler) HandleMinerHeartBeat(ctx context.Context, receivedFrom peer.
 		log.Errorf("proto error")
 		return errors.New("proto error")
 	}
-	//todo: check WalletAddress
-	if hbMsg.WalletAddress == "" {
-		return errors.New("WalletAddress is empty")
-	}
 	if hbMsg.Role != model.RoleMainNode && hbMsg.Role != model.RoleEdgeNode {
 		return errors.New("miner role error")
 	}
 	miner := &model.Miner{
 		Id:           receivedFrom.String(),
-		Address:      hbMsg.WalletAddress,
 		Role:         hbMsg.Role,
 		CreatedAt:    time.Now().Unix(),
 		LastActiveAt: time.Now().Unix(),
@@ -69,7 +64,7 @@ func (h *V1Handler) HandleMinerHeartBeat(ctx context.Context, receivedFrom peer.
 	if h.store.MinerExist(miner.Id) {
 		return h.store.UpdateMiner(miner)
 	}
-	return h.store.CreateMiner(miner)
+	return nil
 }
 
 func (h *V1Handler) HandleWindowPostResp(ctx context.Context, receivedFrom peer.ID, msg *proto.Message) error {

@@ -135,7 +135,7 @@ func (s *Storage) syncToOtherPeers(ctx context.Context, fileCid cid.Cid) (peerId
 
 	//todo: 根据节点的容量等判断
 	selector := NewPeerSelector()
-	peers, _ = selector.GetPeers(ctx, s.filterPeers(s.allMiners(), peers), s.replicas-1)
+	peers, _ = selector.GetPeers(ctx, s.filterPeers(s.allMiners(), peers), s.replicas)
 	for _, peer := range peers {
 		err := s.publishFetchMessage(ctx, peer.ID(), fileCid)
 		if err != nil {

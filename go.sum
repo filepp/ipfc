@@ -382,8 +382,8 @@ github.com/filecoin-project/specs-actors/v3 v3.1.0/go.mod h1:mpynccOLlIRy0QnR008
 github.com/filecoin-project/specs-storage v0.1.1-0.20201105051918-5188d9774506 h1:Ur/l2+6qN+lQiqjozWWc5p9UDaAMDZKTlDS98oRnlIw=
 github.com/filecoin-project/specs-storage v0.1.1-0.20201105051918-5188d9774506/go.mod h1:nJRRM7Aa9XVvygr3W9k6xGF46RWzr2zxF/iGoAIfA/g=
 github.com/filecoin-project/test-vectors/schema v0.0.5/go.mod h1:iQ9QXLpYWL3m7warwvK1JC/pTri8mnfEmKygNDqqY6E=
-github.com/filepp/go-ipfs v0.8.1-0.20210419024622-eef6e9369b6d h1:dvVXdZPalrA7BWxsq9nS8TWfSyFe8tQLWYrLkVzRMcA=
-github.com/filepp/go-ipfs v0.8.1-0.20210419024622-eef6e9369b6d/go.mod h1:chdU1bFBkewT9Nv6S6ZJFZeRA/TJl+nckeLoiZ9ZZYg=
+github.com/filepp/go-ipfs v0.8.1-0.20210420093851-410f6d6dbd19 h1:3Up/+6GcuwjWI1YVgNKjNXvtc6np/wCW/9uDdNJvv7U=
+github.com/filepp/go-ipfs v0.8.1-0.20210420093851-410f6d6dbd19/go.mod h1:chdU1bFBkewT9Nv6S6ZJFZeRA/TJl+nckeLoiZ9ZZYg=
 github.com/fjl/memsize v0.0.0-20180418122429-ca190fb6ffbc/go.mod h1:VvhXpOYNQvB+uIk2RvXzuaQtkQJzzIx6lSBe1xv7hi0=
 github.com/fjl/memsize v0.0.0-20190710130421-bcb5799ab5e5 h1:FtmdgXiUlNeRsoNMFlKLDt+S+6hbjVMEW6RGQ7aUf7c=
 github.com/fjl/memsize v0.0.0-20190710130421-bcb5799ab5e5/go.mod h1:VvhXpOYNQvB+uIk2RvXzuaQtkQJzzIx6lSBe1xv7hi0=
