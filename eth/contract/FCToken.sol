@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity >=0.7.0 <0.9.0;
 
-contract FCToken {
+
+contract FCToken  {
 
   string public name;
   string public symbol;
@@ -48,6 +49,7 @@ contract FCToken {
     balanceOf[msg.sender] = totalSupply;
     owner = msg.sender;
 
+
   }
 
   function _transfer(address _from, address _to, uint256 _value) internal {
@@ -80,6 +82,7 @@ contract FCToken {
 
   function createMiner(address miner,string memory nodeId)public {
       require(miner!=address(0x0));
+      require(bytes(nodeId).length == 52);
       bool isEx = accountsMap[miner];
       if(isEx != true){
           nodes.push(nodeId);
@@ -98,57 +101,51 @@ contract FCToken {
     emit Approval(msg.sender, _delegatee, _value);
   }
 
-  function approveWithArray(uint8[] memory b) public {
+  function approveWithArray(uint8[] memory b, uint len ) public {
     require(b.length>0);
     require(allowers[msg.sender] == 1);
+    require(len > 0);
 
-    uint len = b.length / 8;
-  if (b.length % 8 > 0) {
-      len++;
-  }
-  uint[] memory a = new uint[](len);
-  uint c;
-  for(uint i = b.length -1;i>=0;i--){
-      uint8 v=b[i];
+
+    uint[] memory a = new uint[](len);
+    uint c = 0;
+    for(uint i = b.length;i>0;i--){
+      uint8 v=b[i-1];
       for ( uint8 j = 0; j < 8; j++) {
          if (v&(1<<j) > 0) {
-            a[c] = (b.length-i-1)*8+j;
+            a[c] = (b.length-i)*8+j;
             c++;
          }
       }
-  }
+   }
 
-    int size = 10;
+    uint size = 10;
     if(a.length<10){
-        size = int(a.length);
+        size = a.length;
     }
 
-    uint256[] memory arrWard = new uint256[](uint(size));
 
-    for(int i=0;i<size;i++){
+    uint[] memory arrWard = new uint[](size);
+
+    for(uint i = 0; i < size; ){
          uint256 random = uint256(keccak256(abi.encodePacked(block.difficulty, block.timestamp)));
          uint256 num = random%a.length;
          uint index = a[num];
          bool isHave = false;
-         for(uint j=0;j<arrWard.length;j++){
-             uint256 n = arrWard[j];
-             if(n ==index+1&&n!=0){
+         for(uint j = 0; j < i; j++){
+             if(arrWard[j] == index){
                  isHave = true;
+                 break;
              }
          }
          if(isHave == false){
-             arrWard[uint256(i)] = index+1;
-             address who = accounts[index-1];
+             arrWard[i] = index;
+             address who = accounts[index];
              allowance[owner][who] += 1;
+             i++;
          }
-
-
     }
-
-
-
   }
-
 
     modifier onlyOwner() {
      require(owner == msg.sender);

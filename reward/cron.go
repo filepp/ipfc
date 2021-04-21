@@ -2,13 +2,11 @@ package reward
 
 import (
 	"context"
-	"github.com/ethereum/go-ethereum/common/math"
 	logging "github.com/ipfs/go-log/v2"
-	"github.com/jinzhu/gorm"
 	"ipfc/dbstore/ds"
 	"ipfc/dbstore/model"
 	"ipfc/eth"
-	"math/big"
+	"ipfc/utils/encoding"
 	"sync"
 	"time"
 )
@@ -108,22 +106,15 @@ func (m *Cron) runDistributeToken(ctx context.Context) {
 		defer func() {
 			m.wg.Done()
 		}()
-		ticker := time.NewTicker(time.Minute * 10)
+		//ticker := time.NewTicker(time.Minute * 10)
+		ticker := time.NewTicker(time.Second * 5)
 		defer ticker.Stop()
 		for {
 			select {
 			case <-ctx.Done():
 				return
 			case <-ticker.C:
-				if time.Now().Hour() == 0 {
-					disLog, err := m.store.GetLastDistributionLog()
-					if err != nil && err != gorm.ErrRecordNotFound {
-						continue
-					}
-					if disLog.CreatedAt+60*60*24 < time.Now().Unix() {
-						m.distributeToken(ctx)
-					}
-				}
+				m.distributeToken(ctx)
 			}
 		}
 	}()
@@ -135,63 +126,22 @@ func (m *Cron) distributeToken(ctx context.Context) {
 		log.Errorf("failed to get miners")
 		return
 	}
-	var minerList []*model.Miner
+	var indexes []int
 	tNow := time.Now().Unix()
 
 	for _, miner := range miners {
 		// 最近一个小时在线的矿工
 		if miner.LastActiveAt+60*60 > tNow {
-			minerList = append(minerList, miner)
+			indexes = append(indexes, miner.Idx)
 		}
 	}
-	reward := big.NewInt(0).Div(m.rewardPerDay(), big.NewInt(int64(len(minerList))))
-	var (
-		addresses []string
-		rewards   []*big.Int
-	)
-	batch := 10
-	for _, miner := range minerList {
-		select {
-		case <-ctx.Done():
+	if len(indexes) > 0 {
+		data := encoding.EncodeIndex(indexes)
+		tx, err := m.contract.Approves(data, len(indexes))
+		if err != nil {
+			log.Errorf("failed to approve")
 			return
-		default:
 		}
-		addresses = append(addresses, miner.Address)
-		rewards = append(rewards, reward)
-		if len(addresses) == batch {
-			m.sendApproves(addresses, rewards)
-			addresses = make([]string, 0)
-			rewards = make([]*big.Int, 0)
-		}
+		log.Infof("approve tx: %v", tx.Hash().String())
 	}
-	if len(addresses) > 0 {
-		m.sendApproves(addresses, rewards)
-	}
-	m.store.CreateDistributionLog(&model.DistributionLog{
-		Amount:    reward.String(),
-		CreatedAt: time.Now().Unix(),
-	})
-}
-
-func (m *Cron) sendApproves(addresses []string, rewards []*big.Int) (err error) {
-	//for i := 0; i < 3; i++ {
-	//	_, err = m.contract.Approves(addresses, rewards)
-	//	if err != nil {
-	//		log.Errorf("failed to approve: %v", err.Error())
-	//		time.Sleep(time.Minute)
-	//		continue
-	//	}
-	//	return nil
-	//}
-	//return err
-	return err
-}
-
-func (m *Cron) rewardPerDay() *big.Int {
-	decimals, err := m.contract.GetDecimals()
-	if err != nil {
-		decimals = 0
-	}
-	mm := math.BigPow(int64(10), int64(decimals))
-	return big.NewInt(0).Mul(big.NewInt(m.conf.Amount), mm)
 }
