@@ -98,6 +98,19 @@ func (s *DbStore) GetAllMiners(role, state int) (miners []*model.Miner, err erro
 	return miners, nil
 }
 
+func (s *DbStore) GetMaxMinerIndex() (int, error) {
+	var miner model.Miner
+	ret := s.db.Model(&model.Miner{}).Order("idx DESC").First(&miner)
+	if ret.Error != nil {
+		if ret.Error != gorm.ErrRecordNotFound {
+			log.Errorf("failed to get miner: %v", ret.Error)
+			return 0, ret.Error
+		}
+		return 0, nil
+	}
+	return miner.Idx, ret.Error
+}
+
 func (s *DbStore) FileExist(cid string) bool {
 	file := model.File{}
 	ret := s.db.Model(&model.File{}).Where("cid=?", cid).First(&file)

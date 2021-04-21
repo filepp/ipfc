@@ -38,12 +38,77 @@ func NewCron(store *ds.DbStore, contract *eth.Contract, conf Config) Cron {
 func (m *Cron) Run() {
 	ctx, cancel := context.WithCancel(context.Background())
 	m.cancel = cancel
+	m.runCreateMiner(ctx)
+	m.runDistributeToken(ctx)
+}
+
+func (m *Cron) Stop() {
+	m.cancel()
+	m.wg.Wait()
+}
+
+func (m *Cron) runCreateMiner(ctx context.Context) {
 	m.wg.Add(1)
 	go func() {
 		defer func() {
 			m.wg.Done()
 		}()
+		m.createMiners(ctx)
 		ticker := time.NewTicker(time.Minute)
+		defer ticker.Stop()
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case <-ticker.C:
+				m.createMiners(ctx)
+			}
+		}
+	}()
+}
+
+func (m *Cron) createMiners(ctx context.Context) {
+	index, err := m.store.GetMaxMinerIndex()
+	if err != nil {
+		log.Errorf("failed to get miner count:%v", err)
+		return
+	}
+	accountCount, err := m.contract.GetAccountCount()
+	if err != nil {
+		log.Errorf("failed to get miner count:%v", err)
+		return
+	}
+	for i := int64(index); i < accountCount; i++ {
+		address, minerId, err := m.contract.GetAccount(i)
+		if err != nil {
+			log.Errorf("failed to get account:%v", err)
+			return
+		}
+		if m.store.MinerExist(minerId) {
+			continue
+		}
+		miner := &model.Miner{
+			Id:        minerId,
+			Address:   address,
+			Role:      model.RoleEdgeNode,
+			Idx:       int(i),
+			CreatedAt: time.Now().Unix(),
+		}
+		err = m.store.CreateMiner(miner)
+		if err != nil {
+			log.Errorf("failed to create miner:%v", err)
+			return
+		}
+	}
+}
+
+func (m *Cron) runDistributeToken(ctx context.Context) {
+	m.wg.Add(1)
+	go func() {
+		defer func() {
+			m.wg.Done()
+		}()
+		ticker := time.NewTicker(time.Minute * 10)
 		defer ticker.Stop()
 		for {
 			select {
@@ -62,11 +127,6 @@ func (m *Cron) Run() {
 			}
 		}
 	}()
-}
-
-func (m *Cron) Stop() {
-	m.cancel()
-	m.wg.Wait()
 }
 
 func (m *Cron) distributeToken(ctx context.Context) {
@@ -114,15 +174,16 @@ func (m *Cron) distributeToken(ctx context.Context) {
 }
 
 func (m *Cron) sendApproves(addresses []string, rewards []*big.Int) (err error) {
-	for i := 0; i < 3; i++ {
-		_, err = m.contract.Approves(addresses, rewards)
-		if err != nil {
-			log.Errorf("failed to approve: %v", err.Error())
-			time.Sleep(time.Minute)
-			continue
-		}
-		return nil
-	}
+	//for i := 0; i < 3; i++ {
+	//	_, err = m.contract.Approves(addresses, rewards)
+	//	if err != nil {
+	//		log.Errorf("failed to approve: %v", err.Error())
+	//		time.Sleep(time.Minute)
+	//		continue
+	//	}
+	//	return nil
+	//}
+	//return err
 	return err
 }
 

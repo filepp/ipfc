@@ -1,17 +1,19 @@
 package eth
 
 import (
-	"math/big"
 	"testing"
 )
 
 func TestTest(t *testing.T) {
 	contract, _ := NewContract(Config{
-		Network:         "https://ropsten.infura.io/v3/f81902bab6204bb88b03a1507225fe0a",
-		ContractAddress: "0x16e2f72518099b64bbD592AB0E3943aE9c41b806",
-		PrivateKey: "6b352ad766b818d15e77ae879ccdd31c0f41aa312d0cc20ca1037b690d6a2531",
-		GasLimit:  10000000,
+		Network:         "https://goerli.infura.io/v3/f81902bab6204bb88b03a1507225fe0a",
+		ContractAddress: "0xC061F4a261A64F1d19aFa834ADFfd7182B684c45",
+		PrivateKey:      "4a3257d745cd03a02293f774c781342bd063f4eafde6575c1f22560dbb8eeee5",
+		GasLimit:        2718749,
+		GasPrice:        5,
 	})
+
+	//contract.Test()
 
 	symbol, err := contract.GetSymbol()
 	if err != nil {
@@ -27,10 +29,25 @@ func TestTest(t *testing.T) {
 	}
 	t.Logf("total supply: %v", supply.String())
 
-	tx, err := contract.Approve("0x7e1608cEe279C33067B1dFf480390c91b2765DBb", big.NewInt(100000000000))
+	decimals, err := contract.GetDecimals()
 	if err != nil {
 		t.Errorf("%v", err)
 		return
 	}
-	t.Logf("total supply: %v", tx.Hash().String())
+	t.Logf("decimals: %v", decimals)
+
+	count, err := contract.GetAccountCount()
+	if err != nil {
+		t.Errorf("%v", err)
+		return
+	}
+	t.Logf("accunt count: %v", count)
+	for i := int64(0); i < count; i++ {
+		address, id, err := contract.GetAccount(i)
+		if err != nil {
+			t.Errorf("%v", err)
+			return
+		}
+		log.Infof("account: %v %v", address, id)
+	}
 }

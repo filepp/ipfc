@@ -14,10 +14,11 @@ mysql:
   db: ipfc
 
 eth:
-  network: https://ropsten.infura.io/v3/f81902bab6204bb88b03a1507225fe0a
-  contract_address: 0x6a128366A32172De36eA800e769007af64f2890d
-  private_key: 6b352ad766b818d15e77ae879ccdd31c0f41aa312d0cc20ca1037b690d6a2531
-  gas_limit: 1000000
+  network: https://goerli.infura.io/v3/f81902bab6204bb88b03a1507225fe0a
+  contract_address: 0xC061F4a261A64F1d19aFa834ADFfd7182B684c45
+  private_key: 4a3257d745cd03a02293f774c781342bd063f4eafde6575c1f22560dbb8eeee5
+  gas_price: 5
+  gas_limit: 100000
 
 reward:
   amount: 1000

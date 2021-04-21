@@ -5,7 +5,6 @@ import (
 	"crypto/ecdsa"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
 	logging "github.com/ipfs/go-log/v2"
@@ -19,6 +18,7 @@ type Config struct {
 	Network         string `yaml:"network"`
 	ContractAddress string `yaml:"contract_address"`
 	PrivateKey      string `yaml:"private_key"`
+	GasPrice        uint64 `yaml:"gas_price"`
 	GasLimit        uint64 `yaml:"gas_limit"`
 }
 
@@ -87,36 +87,79 @@ func (c *Contract) GetDecimals() (uint8, error) {
 	return s, nil
 }
 
-func (c *Contract) Approve(address string, value *big.Int) (*types.Transaction, error) {
-	opt, err := bind.NewKeyedTransactorWithChainID(c.privateKey, c.chainId)
+func (c *Contract) GetAccountCount() (int64, error) {
+	ret, err := c.token.GetAccountCount(nil)
 	if err != nil {
-		log.Errorf("failed to NewKeyedTransactorWithChainID, %v", err)
-		return nil, err
+		log.Errorf("failed to get Decimals, %v", err)
+		return 0, err
 	}
-	opt.GasLimit = c.conf.GasLimit
-	tx, err := c.token.Approval(opt, common.HexToAddress(address), value)
-	if err != nil {
-		log.Errorf("failed to Approval, %v", err)
-		return nil, err
-	}
-	return tx, nil
+	return ret.Int64(), nil
 }
 
-func (c *Contract) Approves(addresses []string, value []*big.Int) (*types.Transaction, error) {
+func (c *Contract) GetAccount(index int64) (string, string, error) {
+	address, err := c.token.Accounts(nil, big.NewInt(index))
+	if err != nil {
+		log.Errorf("failed to get Accounts, %v", err)
+		return "", "", err
+	}
+
+	peerId, err := c.token.Nodes(nil, big.NewInt(index))
+	if err != nil {
+		log.Errorf("failed to get Nodes, %v", err)
+		return "", "", err
+	}
+
+	return address.String(), peerId, nil
+}
+
+func (c *Contract) Test() {
 	opt, err := bind.NewKeyedTransactorWithChainID(c.privateKey, c.chainId)
 	if err != nil {
 		log.Errorf("failed to NewKeyedTransactorWithChainID, %v", err)
-		return nil, err
+		return
 	}
+	opt.GasPrice = big.NewInt(5)
 	opt.GasLimit = c.conf.GasLimit
-	addrs := make([]common.Address, len(addresses))
-	for i, addr := range addresses {
-		addrs[i] = common.HexToAddress(addr)
-	}
-	tx, err := c.token.ApproveWthArray(opt, addrs, value)
+
+	addr := common.HexToAddress("0xc904025aB325669E1A2C24e217AA02BD3717F68b")
+	_, err = c.token.CreateMiner(opt, addr, "nnnnnnnnnnnn")
 	if err != nil {
-		log.Errorf("failed to Approval, %v", err)
-		return nil, err
+		log.Errorf("failed to create miner, %v", err)
+		return
 	}
-	return tx, nil
 }
+
+//func (c *Contract) Approve(address string, value *big.Int) (*types.Transaction, error) {
+//	opt, err := bind.NewKeyedTransactorWithChainID(c.privateKey, c.chainId)
+//	if err != nil {
+//		log.Errorf("failed to NewKeyedTransactorWithChainID, %v", err)
+//		return nil, err
+//	}
+//	opt.GasLimit = c.conf.GasLimit
+//
+//	tx, err := c.token.Approval(opt, common.HexToAddress(address), value)
+//	if err != nil {
+//		log.Errorf("failed to Approval, %v", err)
+//		return nil, err
+//	}
+//	return tx, nil
+//}
+//
+//func (c *Contract) Approves(addresses []string, value []*big.Int) (*types.Transaction, error) {
+//	opt, err := bind.NewKeyedTransactorWithChainID(c.privateKey, c.chainId)
+//	if err != nil {
+//		log.Errorf("failed to NewKeyedTransactorWithChainID, %v", err)
+//		return nil, err
+//	}
+//	opt.GasLimit = c.conf.GasLimit
+//	addrs := make([]common.Address, len(addresses))
+//	for i, addr := range addresses {
+//		addrs[i] = common.HexToAddress(addr)
+//	}
+//	tx, err := c.token.ApproveWthArray(opt, addrs, value)
+//	if err != nil {
+//		log.Errorf("failed to Approval, %v", err)
+//		return nil, err
+//	}
+//	return tx, nil
+//}

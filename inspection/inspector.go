@@ -60,6 +60,15 @@ func NewInspector(peerId, addr string, store *ds.DbStore, localStore ds2.Datasto
 func (m *Inspector) Run() {
 	ctx, cancel := context.WithCancel(context.Background())
 	m.cancel = cancel
+	m.runInspect(ctx)
+}
+
+func (m *Inspector) Stop() {
+	m.cancel()
+	m.wg.Wait()
+}
+
+func (m *Inspector) runInspect(ctx context.Context) {
 	m.wg.Add(1)
 	go func() {
 		defer func() {
@@ -69,7 +78,7 @@ func (m *Inspector) Run() {
 		// 两个小时一次巡检，一天做12次, UTC时间0点为分割点
 		slots := [12]bool{}
 		preTwoHour := int(time.Now().Unix() / 60 / 60 / 2)
-		ticker := time.NewTicker(time.Second)
+		ticker := time.NewTicker(time.Minute)
 		defer ticker.Stop()
 		for {
 			select {
@@ -89,11 +98,6 @@ func (m *Inspector) Run() {
 			}
 		}
 	}()
-}
-
-func (m *Inspector) Stop() {
-	m.cancel()
-	m.wg.Wait()
 }
 
 func (m *Inspector) inspect(ctx context.Context) {
