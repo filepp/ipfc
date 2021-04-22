@@ -106,8 +106,8 @@ func (m *Cron) runDistributeToken(ctx context.Context) {
 		defer func() {
 			m.wg.Done()
 		}()
-		//ticker := time.NewTicker(time.Minute * 10)
-		ticker := time.NewTicker(time.Second * 5)
+		ticker := time.NewTicker(time.Minute * 10)
+		//ticker := time.NewTicker(time.Second * 5)
 		defer ticker.Stop()
 		for {
 			select {

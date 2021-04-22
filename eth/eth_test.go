@@ -7,8 +7,8 @@ import (
 
 var conf = Config{
 	Network:         "https://goerli.infura.io/v3/f81902bab6204bb88b03a1507225fe0a",
-	ContractAddress: "0x7b63F4B3d97f509bE4fCbb5a85e2d0672b9Fda4a",
-	PrivateKey:      "4a3257d745cd03a02293f774c781342bd063f4eafde6575c1f22560dbb8eeee5",
+	ContractAddress: "0xc5E80ab6109472E8FF21841b3e96F125592C6e37",
+	PrivateKey:      "080ebaab2013d69ac721ff891060f5fdb60cf1a2e353db77f3bca7e5e01de0ff",
 	GasLimit:        5718749,
 	GasPrice:        10,
 }

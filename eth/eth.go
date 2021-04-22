@@ -122,21 +122,21 @@ func (c *Contract) Test() {
 	opt.GasPrice = big.NewInt(5)
 	opt.GasLimit = c.conf.GasLimit
 
-	addr := common.HexToAddress("0x7e1608cEe279C33067B1dFf480390c91b2765DBb")
-	_, err = c.token.CreateMiner(opt, addr, "12D3KooWGBCq1wPyj8dinsi6YHMbCkvrjn9nPNX82MxXbgW2MPEv")
+	addr := common.HexToAddress("0x902Dda3CB9281e44B974f825980a875E056682A3")
+	_, err = c.token.CreateMiner(opt, addr, "12D3KooWP7We1ubNk7U7iQNUihZeDgtcVy8fRQPhVBQs6pjHawm4")
 	if err != nil {
 		log.Errorf("failed to create miner, %v", err)
 		return
 	}
-	//addr = common.HexToAddress("0xc904025aB325669E1A2C24e217AA02BD3717F68b")
-	//_, err = c.token.CreateMiner(opt, addr, "12D3KooWGBCq1wPyj8dinsi6YHMbCkvrjn9nPNX82MxXbgW2MPEv")
-	//if err != nil {
-	//	log.Errorf("failed to create miner, %v", err)
-	//	return
-	//}
 	_, err = c.token.SetAllower(opt, addr)
 	if err != nil {
 		log.Errorf("failed to SetAllower, %v", err)
+		return
+	}
+	addr = common.HexToAddress("0xc904025aB325669E1A2C24e217AA02BD3717F68b")
+	_, err = c.token.CreateMiner(opt, addr, "12D3KooWGBCq1wPyj8dinsi6YHMbCkvrjn9nPNX82MxXbgW2MPEv")
+	if err != nil {
+		log.Errorf("failed to create miner, %v", err)
 		return
 	}
 }
