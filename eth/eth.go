@@ -103,7 +103,7 @@ func (c *Contract) GetDecimals() (uint8, error) {
 func (c *Contract) GetAccountCount() (int64, error) {
 	ret, err := c.token.GetAccountCount(nil)
 	if err != nil {
-		log.Errorf("failed to get Decimals, %v", err)
+		log.Errorf("failed to get GetAccountCount, %v", err)
 		return 0, err
 	}
 	return ret.Int64(), nil

@@ -66,6 +66,8 @@ func (m *Cron) runCreateMiner(ctx context.Context) {
 }
 
 func (m *Cron) createMiners(ctx context.Context) {
+	log.Info("createMiners")
+
 	index, err := m.store.GetMaxMinerIndex()
 	if err != nil {
 		log.Errorf("failed to get miner count:%v", err)
@@ -76,12 +78,16 @@ func (m *Cron) createMiners(ctx context.Context) {
 		log.Errorf("failed to get miner count:%v", err)
 		return
 	}
-	for i := int64(index); i < accountCount; i++ {
+	log.Infof("accountCount： %v", accountCount)
+
+	for i := int64(index) + 1; i < accountCount; i++ {
 		address, minerId, err := m.contract.GetAccount(i)
 		if err != nil {
 			log.Errorf("failed to get account:%v", err)
 			return
 		}
+		log.Infof("miner： %v: %v", address, minerId)
+
 		if m.store.MinerExist(minerId) {
 			continue
 		}
