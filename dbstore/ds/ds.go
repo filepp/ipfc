@@ -37,7 +37,6 @@ func (s *DbStore) CreateMiner(miner *model.Miner) error {
 
 func (s *DbStore) UpdateMiner(miner *model.Miner) error {
 	mm := map[string]interface{}{}
-	mm["address"] = miner.Address
 	mm["role"] = miner.Role
 	mm["last_active_at"] = miner.LastActiveAt
 
