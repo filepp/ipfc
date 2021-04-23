@@ -6,11 +6,12 @@ import (
 )
 
 var conf = Config{
-	Network:         "https://goerli.infura.io/v3/f81902bab6204bb88b03a1507225fe0a",
+	//Network:         "https://goerli.infura.io/v3/f81902bab6204bb88b03a1507225fe0a",
+	//Network:         "https://data-seed-prebsc-1-s2.binance.org:8545/",
+	Network:         "https://data-seed-prebsc-1-s1.binance.org:8545/",
 	ContractAddress: "0xc5E80ab6109472E8FF21841b3e96F125592C6e37",
 	PrivateKey:      "080ebaab2013d69ac721ff891060f5fdb60cf1a2e353db77f3bca7e5e01de0ff",
-	GasLimit:        5718749,
-	GasPrice:        10,
+	GasLimit:        3141592,
 }
 
 func TestTest(t *testing.T) {

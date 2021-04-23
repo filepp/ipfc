@@ -11,6 +11,8 @@ import (
 	logging "github.com/ipfs/go-log/v2"
 	"ipfc/eth/contract"
 	"math/big"
+	"math/rand"
+	"sync"
 )
 
 var log = logging.Logger("eth")
@@ -19,7 +21,6 @@ type Config struct {
 	Network         string `yaml:"network"`
 	ContractAddress string `yaml:"contract_address"`
 	PrivateKey      string `yaml:"private_key"`
-	GasPrice        int64  `yaml:"gas_price"`
 	GasLimit        uint64 `yaml:"gas_limit"`
 }
 
@@ -28,6 +29,8 @@ type Contract struct {
 	token      *contract.FCToken
 	chainId    *big.Int
 	privateKey *ecdsa.PrivateKey
+	Nonce      *big.Int
+	mutex      sync.RWMutex
 }
 
 func NewContract(conf Config) (*Contract, error) {
@@ -57,7 +60,16 @@ func NewContract(conf Config) (*Contract, error) {
 		token:      token,
 		chainId:    chainId,
 		privateKey: key,
+		Nonce:      big.NewInt(rand.Int63() % 1000),
 	}, nil
+}
+
+func (c *Contract) getNonce() *big.Int {
+	c.mutex.Lock()
+	defer c.mutex.Unlock()
+	ret := big.NewInt(0).Set(c.Nonce)
+	c.Nonce.Add(c.Nonce, big.NewInt(1))
+	return ret
 }
 
 func (c *Contract) TotalSupply() (*big.Int, error) {
@@ -119,26 +131,31 @@ func (c *Contract) Test() {
 		log.Errorf("failed to NewKeyedTransactorWithChainID, %v", err)
 		return
 	}
-	opt.GasPrice = big.NewInt(5)
 	opt.GasLimit = c.conf.GasLimit
 
 	addr := common.HexToAddress("0x902Dda3CB9281e44B974f825980a875E056682A3")
-	_, err = c.token.CreateMiner(opt, addr, "12D3KooWP7We1ubNk7U7iQNUihZeDgtcVy8fRQPhVBQs6pjHawm4")
+	tx, err := c.token.CreateMiner(opt, addr, "12D3KooWP7We1ubNk7U7iQNUihZeDgtcVy8fRQPhVBQs6pjHawm4")
 	if err != nil {
 		log.Errorf("failed to create miner, %v", err)
 		return
 	}
-	_, err = c.token.SetAllower(opt, addr)
+	log.Infof("tx: %v", tx.Hash().String())
+
+	//opt.Nonce = c.getNonce()
+	tx, err = c.token.SetAllower(opt, addr)
 	if err != nil {
 		log.Errorf("failed to SetAllower, %v", err)
 		return
 	}
+	log.Infof("tx: %v", tx.Hash().String())
+
 	addr = common.HexToAddress("0xc904025aB325669E1A2C24e217AA02BD3717F68b")
-	_, err = c.token.CreateMiner(opt, addr, "12D3KooWGBCq1wPyj8dinsi6YHMbCkvrjn9nPNX82MxXbgW2MPEv")
+	tx, err = c.token.CreateMiner(opt, addr, "12D3KooWGBCq1wPyj8dinsi6YHMbCkvrjn9nPNX82MxXbgW2MPEv")
 	if err != nil {
 		log.Errorf("failed to create miner, %v", err)
 		return
 	}
+	log.Infof("tx: %v", tx.Hash().String())
 }
 
 func (c *Contract) Approves(data []uint8, len int) (*types.Transaction, error) {
@@ -148,7 +165,7 @@ func (c *Contract) Approves(data []uint8, len int) (*types.Transaction, error) {
 		return nil, err
 	}
 	opt.GasLimit = c.conf.GasLimit
-	opt.GasPrice = big.NewInt(c.conf.GasPrice)
+
 	tx, err := c.token.ApproveWithArray(opt, data, big.NewInt(int64(len)))
 	if err != nil {
 		log.Errorf("failed to Approval, %v", err)
