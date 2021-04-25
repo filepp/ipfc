@@ -25,12 +25,13 @@ type Config struct {
 }
 
 type Contract struct {
-	conf       Config
-	token      *contract.FCToken
-	chainId    *big.Int
-	privateKey *ecdsa.PrivateKey
-	Nonce      *big.Int
-	mutex      sync.RWMutex
+	conf          Config
+	token         *contract.FCToken
+	chainId       *big.Int
+	privateKey    *ecdsa.PrivateKey
+	walletAddress common.Address
+	Nonce         *big.Int
+	mutex         sync.RWMutex
 }
 
 func NewContract(conf Config) (*Contract, error) {
@@ -54,13 +55,13 @@ func NewContract(conf Config) (*Contract, error) {
 		log.Errorf("Failed to decode private key: %v", err)
 		return nil, err
 	}
-
 	return &Contract{
-		conf:       conf,
-		token:      token,
-		chainId:    chainId,
-		privateKey: key,
-		Nonce:      big.NewInt(rand.Int63() % 1000),
+		conf:          conf,
+		token:         token,
+		chainId:       chainId,
+		privateKey:    key,
+		walletAddress: crypto.PubkeyToAddress(key.PublicKey),
+		Nonce:         big.NewInt(rand.Int63() % 1000),
 	}, nil
 }
 
@@ -123,6 +124,20 @@ func (c *Contract) GetAccount(index int64) (string, string, error) {
 	}
 
 	return address.String(), peerId, nil
+}
+
+func (c *Contract) GetBalanceOfWallet() (*big.Int, error) {
+	return c.GetBalanceOf(c.walletAddress)
+}
+
+func (c *Contract) GetBalanceOf(addr common.Address) (*big.Int, error) {
+	balance, err := c.token.BalanceOf(nil, addr)
+	if err != nil {
+		log.Errorf("failed to balance of %v: %v", addr.String(), err)
+		return balance, err
+	}
+	log.Infof("balance of %v: %v", addr, balance.Int64())
+	return balance, nil
 }
 
 func (c *Contract) Test() {

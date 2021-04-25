@@ -6,18 +6,47 @@ import (
 	"github.com/liyue201/golib/xsignal"
 	"ipfc/api"
 	"ipfc/dbstore/ds"
+	"ipfc/eth"
 	"ipfc/storage/ipfs"
 	"ipfc/storage/lotus"
 	"ipfc/storage/mananer"
 	"ipfc/storage/repo"
 	"ipfc/utils/xgorm"
+	"math"
 )
 
 var log = logging.Logger("main")
 
+func checkBalanceOfWallet() bool {
+	contract, err := eth.NewContract(AppConfig.Eth)
+	if err != nil {
+		log.Errorf("failed to new contract: %v", err)
+		return false
+	}
+	balance, err := contract.GetBalanceOfWallet()
+	if err != nil {
+		log.Errorf("failed to get balance: %v", err)
+		return false
+	}
+	decimals, err := contract.GetDecimals()
+	if err != nil {
+		log.Errorf("failed to get decimals: %v", err)
+		return false
+	}
+
+	if float64(balance.Int64()) < math.Pow(10, float64(decimals))*1_000_000_000 {
+		log.Errorf("no enough FC")
+		return false
+	}
+	return true
+}
+
 func main() {
 	conf := AppConfig
 	log.Infof("conf: %v", conf)
+	if !checkBalanceOfWallet() {
+		return
+	}
 
 	repository := repo.NewRepository(conf.Repo.Dir)
 	dbConf := xgorm.DefaultConfig()

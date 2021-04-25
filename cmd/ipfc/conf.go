@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"github.com/jinzhu/configor"
+	"ipfc/eth"
 	"ipfc/storage/lotus"
 	"os"
 )
@@ -49,6 +50,7 @@ type (
 		Http  HttpServerConf   `yaml:"http"`
 		Repo  RepoConf         `yaml:"repo"`
 		Deal  lotus.DealConfig `yaml:"deal"`
+		Eth   eth.Config       `yaml:"eth"`
 	}
 )
 

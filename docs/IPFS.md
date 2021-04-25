@@ -1,84 +1,40 @@
 
-### 安装IPFS
-参考： https://docs.ipfs.io/recent-releases/go-ipfs-0-7/install/#linux    
-ipfs下载地址 https://dist.ipfs.io/go-ipfs/v0.8.0  
+## 边缘节点挖矿教程
+
+### 编译代码
 ```
-wget https://dist.ipfs.io/go-ipfs/v0.8.0/go-ipfs_v0.8.0_linux-amd64.tar.gz
-tar -xvzf go-ipfs_v0.8.0_linux-amd64.tar.gz
+git clone https://github.com/filepp/go-ipfs
 cd go-ipfs
-./install.sh
-ipfs --version
+make build
+cp cmd/ipfs /usr/local/bin
 ```
-初始化仓库目录，会自动生成目录` ~/.ipfs`
+
+### 运行节点
+
+运行
 ```
 ipfs init
+ipfs daemon
 ```
 
-启动节点
+获取节点id
 ```
-ipfs bootstrap rm --all　
-nohup ipfs daemon &> ipfs.log &
-```
-
-
-### 部署webui， 
-
-安装webui，指定端口3001
-```
-https://github.com/ipfs-shipyard/ipfs-webui
-cd ipfs-webui
-npm install -g cnpm --registry=https://registry.npm.taobao.org	
-cnpm install
-PORT=3001 npm start
-```
-或者使用docker
-```
-docker run -d --name webui -p 3001:3000  garychen/ipfs-webui:latest
+ipfs id
 ```
 
-打开web, 假设ip为192.168.3.101
 
-http://192.168.3.101:3001
-
-报错，根据提示修改配置 `~/.ipfs/config`,以下4处
+### 创建矿工
+1 使用chrome浏览器，安装MetaMask钱包
+2 MetaMask钱包配置好BSC地址。  
 ```
-{
-  "API": {
-    "HTTPHeaders": {
-      "Access-Control-Allow-Methods": [  //1.这里
-        "PUT",
-        "POST"
-      ],
-      "Access-Control-Allow-Origin": [  
-        "http://192.168.3.101:3001"   // 2.这里
-      ]
-    }
-  },
-  "Addresses": {
-    "API": "/ip4/0.0.0.0/tcp/5001",    // 3.这里
-    "Announce": [],
-    "Gateway": "/ip4/192.168.2.101/tcp/8080",  // 4.这里
-    "NoAnnounce": [], 
-    "Swarm": [
-      "/ip4/0.0.0.0/tcp/4001",
-      "/ip6/::/tcp/4001",
-      "/ip4/0.0.0.0/udp/4001/quic",
-      "/ip6/::/udp/4001/quic"
-    ]
-  },
-   
-  // 省略
-   
-}
-
+主网
+https://bsc-dataseed1.binance.org/
+链id: 56
 ```
-
-重启ipfs
 ```
-nohup ipfs daemon &> ipfs.log &
+测试网
+https://data-seed-prebsc-1-s1.binance.org:8545/
+链id： 97 
 ```
-在web页面配置节点地址 `/ip4/192.168.3.101/tcp/5001`
-
-
-
+3 打开创建矿工页面，连接钱包。填入钱包地址和ipfs节点的id，点击创建矿工按钮。（确保钱包中有足够的BNB）
 

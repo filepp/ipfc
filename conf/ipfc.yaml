@@ -24,3 +24,8 @@ mysql:
   user: root
   password: 123456
   db: ipfc
+
+eth:
+  network: https://data-seed-prebsc-1-s1.binance.org:8545/
+  contract_address: 0xFD3Bf3756AeC1C37d0dD2561369e9D4c94051027
+  private_key: 080ebaab2013d69ac721ff891060f5fdb60cf1a2e353db77f3bca7e5e01de0ff

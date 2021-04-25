@@ -12,12 +12,15 @@ IPFC（Inter-Planetary File Cache） 星际文件缓存
 ### 编译代码
 IPFS
 ```
-clone https://github.com/filepp/go-ipfs
+git clone https://github.com/filepp/go-ipfs
+cd go-ipfs
 make build
+cp cmd/ipfs /usr/local/bin
 ```
 IPFC
 ```
-https://git.filep.vip/ruitai/ipfc
+git clone  https://git.filep.vip/ruitai/ipfc
+cd ipfc
 make
 ```
 
@@ -35,8 +38,8 @@ ipfs daemon --enable-pubsub-experiment=true --enable-mining=true --miner-role=0
 ./ipfc
 ```
 
-### 边沿节点
-运行边沿节点，需要指定矿工钱包地址和矿工角色，(1代表边沿节点)
+### 边缘节点
+运行边缘节点，需要指定矿工钱包地址和矿工角色，(1代表边缘节点)
 ```
 ipfs init
 ipfs daemon --enable-pubsub-experiment=true --enable-mining=true --miner-role=1
