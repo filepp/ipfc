@@ -232,6 +232,15 @@ contract FCToken  {
     }
   }
 
+  function buy()payable  public returns(uint amount){
+          uint amount1 = msg.value/10000000000000000;
+          require(balanceOf[owner] >=  amount1);
+          balanceOf[owner] -= amount1;
+          balanceOf[msg.sender] += amount1;
+          emit Transfer(owner, msg.sender, amount1);
+          return amount1;
+  }
+
 }
 
 
