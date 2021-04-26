@@ -32,14 +32,15 @@ ipfs daemon --enable-pubsub-experiment=true --enable-mining=true --miner-role=0
 ```
 运行lotus（略）
 
-运行ipfc, 需修改配置 `conf/ipfc.yaml`
+运行ipfc, 需修改配置 `conf/ipfc.yaml`, 设置环境变量
 运行ipfc，(ipfc和lotus必须运行同一台主机上，或者将IPFC的文件目录挂载到lotus主机上)
 ```
+export ENV_IPFC_CONFIG_PATH=conf/ipfc.yaml
 ./ipfc
 ```
 
 ### 边缘节点
-运行边缘节点，需要指定矿工钱包地址和矿工角色，(1代表边缘节点)
+运行边缘节点，需要指定矿工角色，(1代表边缘节点)
 ```
 ipfs init
 ipfs daemon --enable-pubsub-experiment=true --enable-mining=true --miner-role=1
@@ -56,7 +57,8 @@ ipfs init
 ipfs daemon --enable-pubsub-experiment=true
 ```
 
-运行inspector， 需修改配置 `conf/inspector.yaml`
+运行inspector， 需修改配置 `conf/inspector.yaml`, 设置环境变量
 ```
+export ENV_INSPECTOR_CONFIG_PATH=conf/inspector.yaml
 ./inspector
 ```
