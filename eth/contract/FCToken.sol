@@ -9,7 +9,7 @@ contract FCToken  {
   uint8 public decimals;
   uint256 public totalSupply;
   address public owner;
-
+  uint public proportion;
   mapping (address => uint256) public balanceOf;
   mapping (address => mapping(address => uint256)) public allowance;
   mapping(address => uint8) public signer;
@@ -48,7 +48,7 @@ contract FCToken  {
     totalSupply = _initiSuppy * 10 ** uint256(decimals);
     balanceOf[msg.sender] = totalSupply;
     owner = msg.sender;
-
+    proportion = 100;
 
   }
 
@@ -141,11 +141,29 @@ contract FCToken  {
          if(isHave == false){
              arrWard[i] = index;
              address who = accounts[index];
-             allowance[owner][who] += 1;
+             allowance[owner][who] += 1* 10 ** uint256(decimals);
              i++;
          }
+
     }
   }
+
+function setPropertion(uint num)public {
+    require(allowers[msg.sender] == 1);
+    require(num>0);
+    proportion = num;
+}
+
+function buy()payable  public returns(uint amount){
+        uint aa = ((uint(msg.value)*(10 ** uint256(decimals)))*proportion)/1000000000000000000;
+        uint amount1 = (aa);
+        require(balanceOf[owner] >=  amount1);
+        balanceOf[owner] -= amount1;
+        balanceOf[msg.sender] += amount1;
+        emit Transfer(owner, msg.sender, amount1);
+        return amount1;
+}
+
 
     modifier onlyOwner() {
      require(owner == msg.sender);
@@ -232,16 +250,4 @@ contract FCToken  {
     }
   }
 
-  function buy()payable  public returns(uint amount){
-          uint amount1 = msg.value/10000000000000000;
-          require(balanceOf[owner] >=  amount1);
-          balanceOf[owner] -= amount1;
-          balanceOf[msg.sender] += amount1;
-          emit Transfer(owner, msg.sender, amount1);
-          return amount1;
-  }
-
 }
-
-
-
