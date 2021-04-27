@@ -19,7 +19,7 @@ cp cmd/ipfs /usr/local/bin
 ```
 IPFC
 ```
-git clone  https://git.filep.vip/ruitai/ipfc
+git clone https://github.com/filepp/ipfc
 cd ipfc
 make
 ```
