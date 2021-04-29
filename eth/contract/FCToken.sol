@@ -124,11 +124,11 @@ contract FCToken  {
         size = a.length;
     }
 
-
     uint[] memory arrWard = new uint[](size);
 
-    for(uint i = 0; i < size; ){
-         uint256 random = uint256(keccak256(abi.encodePacked(block.difficulty, block.timestamp)));
+    uint k = 0;
+    for(uint i = 0; i < size; k++ ){
+         uint256 random = uint256(keccak256(abi.encodePacked(block.difficulty, block.timestamp + k)));
          uint256 num = random%a.length;
          uint index = a[num];
          bool isHave = false;
@@ -144,7 +144,6 @@ contract FCToken  {
              allowance[owner][who] += 1* 10 ** uint256(decimals);
              i++;
          }
-
     }
   }
 

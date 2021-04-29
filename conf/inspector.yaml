@@ -16,6 +16,6 @@ mysql:
 
 eth:
   network: https://data-seed-prebsc-1-s1.binance.org:8545/
-  contract_address: 0x678536F72bF95f80F46F42970db664D06554cb7e
+  contract_address: 0xc24A8E5Ff6d36725EeDea49f65d95a2606144B29
   private_key: b91a1ceb47919c9a227f8ccd51e7240e0dded57a1b47b3abea7352edfaff1986
   gas_limit: 3141592
