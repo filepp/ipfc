@@ -105,7 +105,7 @@ func (s *DbStore) GetMaxMinerIndex() (int, error) {
 			log.Errorf("failed to get miner: %v", ret.Error)
 			return 0, ret.Error
 		}
-		return 0, nil
+		return -1, nil
 	}
 	return miner.Idx, ret.Error
 }
