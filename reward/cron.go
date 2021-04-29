@@ -2,11 +2,13 @@ package reward
 
 import (
 	"context"
+	"github.com/ethereum/go-ethereum/common"
 	logging "github.com/ipfs/go-log/v2"
 	"ipfc/dbstore/ds"
 	"ipfc/dbstore/model"
 	"ipfc/eth"
 	"ipfc/utils/encoding"
+	"math"
 	"sync"
 	"time"
 )
@@ -135,12 +137,23 @@ func (m *Cron) distributeToken(ctx context.Context) {
 	var indexes []int
 	tNow := time.Now().Unix()
 
+	decimals, err := m.contract.GetDecimals()
+	if err != nil {
+		log.Errorf("failed to get decimals")
+		return
+	}
+
 	for _, miner := range miners {
 		// 最近一个小时在线的矿工
 		if miner.LastActiveAt+60*60 > tNow {
+			addr := common.HexToAddress(miner.Address)
+			if !m.checkBalance(addr, decimals) {
+				continue
+			}
 			indexes = append(indexes, miner.Idx)
 		}
 	}
+
 	if len(indexes) > 0 {
 		data := encoding.EncodeIndex(indexes)
 		tx, err := m.contract.Approves(data, len(indexes))
@@ -150,4 +163,19 @@ func (m *Cron) distributeToken(ctx context.Context) {
 		}
 		log.Infof("approve tx: %v", tx.Hash().String())
 	}
+}
+
+func (m *Cron) checkBalance(addr common.Address, decimals uint8) bool {
+	balance, err := m.contract.GetBalanceOf(addr)
+	if err != nil {
+		log.Errorf("failed to get balance: %v", err)
+		return false
+	}
+
+	// 10 FC
+	if float64(balance.Int64()) < math.Pow(10, float64(decimals))*10 {
+		log.Errorf("no enough FC")
+		return false
+	}
+	return true
 }
