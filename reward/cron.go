@@ -155,6 +155,7 @@ func (m *Cron) distributeToken(ctx context.Context) {
 	}
 
 	if len(indexes) > 0 {
+		log.Infof("Approves: %v", indexes)
 		data := encoding.EncodeIndex(indexes)
 		tx, err := m.contract.Approves(data, len(indexes))
 		if err != nil {
